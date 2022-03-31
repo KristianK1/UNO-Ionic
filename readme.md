@@ -5,10 +5,15 @@ Multi-page:
   login/register
   
   see People on Network
+  
     list
+    
       name
+      
       image
+      
       add Friend btn
+      
       
   Friends list
   

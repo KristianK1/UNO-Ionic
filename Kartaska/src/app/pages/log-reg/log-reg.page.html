@@ -1,0 +1,28 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>LogReg</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-item>
+    Register
+    <ion-toggle [(ngModel)]="mode"></ion-toggle>
+    Login
+  </ion-item>
+
+  <ion-input placeholder="Enter your username" [(ngModel)]="username_login"></ion-input>
+  <ion-input placeholder="Enter your password" type="password" [(ngModel)]="password_login"></ion-input>
+  
+  <div *ngIf="mode==true">
+    <ion-button (click)="login()">
+      Login
+    </ion-button>
+  </div>
+
+  <div *ngIf="mode==false">
+    <ion-button (click)="register()">
+      Register
+    </ion-button>
+  </div>
+</ion-content>

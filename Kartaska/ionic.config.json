@@ -1,0 +1,7 @@
+{
+  "name": "Kartaska",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}

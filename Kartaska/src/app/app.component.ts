@@ -12,6 +12,7 @@ export class AppComponent {
   showMenu: boolean;
   showNewLobby: boolean;
   isMobile: boolean;
+  logiran: boolean;
 
   constructor(
     private menuCtrl: MenuController,
@@ -32,6 +33,12 @@ export class AppComponent {
       }
     });
 
+    this.userService.user.subscribe(user => {
+      console.log("user update");
+      
+      this.logiran = !!user;
+    })
+
     this.isMobile = this.platform.is('mobileweb') || this.platform.is('mobile');
     let width: number = this.platform.width();
     if(width < 1000){
@@ -46,7 +53,9 @@ export class AppComponent {
   }
 
   logout(){
+    this.closeMenu();
     this.userService.logout();
+    
   }
 
   openMenu(){

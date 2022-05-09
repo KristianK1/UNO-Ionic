@@ -48,7 +48,7 @@
 
     <ion-router-outlet id="main"></ion-router-outlet>
 
-  <ion-fab [hidden]="(logiran === false) || isMobileX" (click)="openMenu()" vertical="top" horizontal="end" slot="fixed">
+  <ion-fab hidden="logiran == false" (click)="openMenu()" vertical="top" horizontal="end" slot="fixed">
     <ion-fab-button>
       <ion-icon name="menu-outline"> </ion-icon>
     </ion-fab-button>

@@ -21,6 +21,7 @@ export class CameraService {
       correctOrientation: true,
       presentationStyle: 'popover',
     });
+    console.log(photo.base64String);
     return photo.base64String;
   }
 

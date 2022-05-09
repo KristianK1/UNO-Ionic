@@ -31,7 +31,8 @@ export class OpenLobbyPage implements OnInit {
     newLobby.lobbyUUID = uuidv4();
     newLobby.lobbyName = this.lobbyName;
     newLobby.players = [];
-    let me: User = this.userService.user;
+    let me: User = this.userService.user.value;
+    me = JSON.parse(JSON.stringify(me));
     me.password = null;
     //me.userImageLink = null;
     //me.username = null;

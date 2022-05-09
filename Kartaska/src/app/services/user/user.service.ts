@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
+import { BehaviorSubject } from 'rxjs';
 import { User } from 'src/app/interfaces/user';
 import { DatabaseService } from '../database/database.service';
 import { StorageService } from '../storage/storage.service';
@@ -8,7 +9,7 @@ import { StorageService } from '../storage/storage.service';
   providedIn: 'root',
 })
 export class UserService {
-  user: User;
+  user: BehaviorSubject<User> = new BehaviorSubject<User>(null);
   loginDataStorageKey: string = 'loginData';
 
   constructor(
@@ -18,8 +19,10 @@ export class UserService {
   ) {
 
     dbService.allUsers.subscribe(allUsers => {
-      if(!!this.user){
-        let myself = allUsers.find( o => o.username === this.user.username && o.password === this.user.password);
+      if(!!this.user.value){
+        let myself = allUsers.find( o => o.username === this.user.value.username && o.password === this.user.value.password);
+        console.log("ja u user servicu");
+        console.log(this.user.value);
         console.log("ovo sam ja");
         console.log(myself);
         if(!myself){
@@ -31,12 +34,19 @@ export class UserService {
   }
 
   login(name: string, pass: string): boolean {
-    if (!this.user) {
+    console.log("idem se logirat");
+    console.log("svi korisnici");
+    console.log(this.dbService.allUsers.value);
+    
+    
+    if (!this.user.value) {
       let find: User = this.dbService.allUsers.value.find(
         (o) => o.username === name && o.password === pass
       );
       if (find) {
-        this.user = find;
+        console.log("nasao korisnika sa tim credsima");
+        
+        this.user.next(find);
         this.storageService.setData(this.loginDataStorageKey, JSON.stringify(find));
         this.router.navigate(['mainApp/home']);
         return true;
@@ -47,7 +57,7 @@ export class UserService {
 
   logout() {
     this.storageService.removeData(this.loginDataStorageKey);
-    this.user = null;
+    this.user.next(null);
     this.router.navigate(["log-reg"]);
   }
 }

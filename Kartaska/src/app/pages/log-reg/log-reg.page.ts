@@ -21,7 +21,7 @@ export class LogRegPage implements OnInit {
   password_login: string = '';
 
   fileName: string;
-  tempImg: string;
+  tempImg: string = "";
   tempImgPrefix: string; //TODO try to remove this variable
 
   basicImageUrl: string = 'https://firebasestorage.googleapis.com/v0/b/webprogprojekt.appspot.com/o/avatardefault_92824.png?alt=media&token=a3054da1-1d82-4490-80e7-85db058e8795';
@@ -33,7 +33,7 @@ export class LogRegPage implements OnInit {
     private storageService: StorageService,
     private cameraService: CameraService,
     private fireStorageService: FireStorageService
-  ) {}
+  ) { }
 
   async ngOnInit() {
     this.databaseService.dbConnection.subscribe(async (rez) => {
@@ -42,7 +42,7 @@ export class LogRegPage implements OnInit {
           console.log('hello');
 
           let data: string = await this.storageService.getData(this.userService.loginDataStorageKey);
-          
+
           let possibleUser: User = JSON.parse(data);
           console.log(possibleUser);
 
@@ -50,20 +50,20 @@ export class LogRegPage implements OnInit {
             possibleUser.username,
             possibleUser.password
           );
-        } catch {}
+        } catch { }
       }
     });
   }
 
-  changeMode(newMode: boolean){
+  changeMode(newMode: boolean) {
     this.mode = newMode;
   }
 
   async login() {
-    this.userService.login(this.username_login, this.password_login); 
+    this.userService.login(this.username_login, this.password_login);
   }
 
-  async insertImage(){
+  async insertImage() {
     //let perm = await Camera.checkPermissions();
     this.tempImg = await this.cameraService.takePhoto();
     this.tempImgPrefix = "data:image/jpeg;base64," + this.tempImg;
@@ -72,29 +72,35 @@ export class LogRegPage implements OnInit {
   async register() {
     let newUUID = uuidv4();
     if (this.username_login.length >= 5 && this.password_login.length >= 5) {
-
       let imageUrl: string;
-      if(this.tempImg === '') imageUrl = "";
-      else{
+      if (this.tempImg === "") {
+        imageUrl = this.basicImageUrl;
+      }
+      else {
         imageUrl = await this.fireStorageService.uploadImage(newUUID, this.tempImg);
       }
+      console.log(imageUrl);
+
+
 
       let newUser: User = <User>{};
-      
+
       newUser.username = this.username_login;
       newUser.password = this.password_login;
       newUser.userUUID = newUUID;
       newUser.userImageLink = imageUrl;
+      console.log(newUser);
+      let userrr: User = JSON.parse(JSON.stringify(newUser));
+      await this.databaseService.registerUser(userrr);
 
-      this.databaseService.registerUser(newUser);
+      this.userService.login(userrr.username, userrr.password);
 
       this.username_login = "";
       this.password_login = "";
-      newUUID = uuidv4();
       this.tempImg = "";
       this.tempImgPrefix = "";
 
-      
+
     } else {
       alert('Korisnicko ime i lozinka moraju imati najmanje 5 znakova');
     }

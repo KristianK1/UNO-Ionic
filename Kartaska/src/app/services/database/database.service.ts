@@ -27,7 +27,6 @@ export class DatabaseService {
   }
   
   async registerUser(user: User): Promise<boolean> {
-
     for (let i = 0; i<this.allUsers?.value?.length; i++){
       console.log("tt" + i);
       

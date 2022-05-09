@@ -1,5 +1,8 @@
 import { Component } from '@angular/core';
-import { MenuController, Platform } from '@ionic/angular';
+import { Router, RouterState } from '@angular/router';
+import { Lobby } from 'src/app/interfaces/lobby';
+import { DatabaseService } from 'src/app/services/database/database.service';
+import { LobbyService } from 'src/app/services/lobby/lobby.service';
 import { UserService } from 'src/app/services/user/user.service';
 
 @Component({
@@ -8,54 +11,29 @@ import { UserService } from 'src/app/services/user/user.service';
   styleUrls: ['home.page.scss'],
 })
 export class HomePage {
-  showMenu: boolean;
-  showNewLobby: boolean;
-  isMobile: boolean;
 
+  allLobbys: Lobby[] = [];
   constructor(
     private userService: UserService,
-    private menuCtrl: MenuController,
-    private platform: Platform,
+    private databaseService: DatabaseService,
+    private router: Router,
+    private lobbyService: LobbyService,
   ) {}
 
-    ngOnInit(){
-      this.platform.resize.subscribe( x => {
-        let width: number = this.platform.width();
-        if(width < 1000){
-          this.showMenu = false;
-          this.closeMenu();
-        }
-        else{
-          this.showMenu = true;
-          this.openMenu();
-        }
-      });
-
-      this.isMobile = this.platform.is('mobileweb') || this.platform.is('mobile');
-      let width: number = this.platform.width();
-      if(width < 1000){
-        this.showMenu = false;
-        this.closeMenu();
-      }
-      else{
-        this.showMenu = true;
-        this.openMenu();
-      }
-    }
-
-
-
-
-
-  logout(){
-    this.userService.logout();
+  ngOnInit(){
+    this.databaseService.allLobbys.subscribe(rez => {
+      this.allLobbys = rez;
+    })
   }
 
-  openMenu(){
-    this.menuCtrl.open(); //TODO platform - size of screen za pocetno (moze se updetad kad god) stanje menu-a
+  joinLobby(lobbyUUID: string){
+    console.log("joined lobby " + lobbyUUID);
+    this.databaseService.joinLobby(this.userService.user, lobbyUUID);
+    this.lobbyService.currentLobbyUUID.next(lobbyUUID);
+    this.router.navigate(["mainApp/lobby"]);
   }
-  
-  closeMenu(){
-    this.menuCtrl.close();
-  }
+
+
+
+
 }

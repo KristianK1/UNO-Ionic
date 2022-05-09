@@ -9,21 +9,35 @@ import { StorageService } from '../storage/storage.service';
 })
 export class UserService {
   user: User;
+  loginDataStorageKey: string = 'loginData';
 
   constructor(
     private dbService: DatabaseService,
     private router: Router,
-    private storageService: StorageService
-  ) {}
+    private storageService: StorageService,
+  ) {
 
-  login(name: string, pass: string, must?: boolean): boolean {
+    dbService.allUsers.subscribe(allUsers => {
+      if(!!this.user){
+        let myself = allUsers.find( o => o.username === this.user.username && o.password === this.user.password);
+        console.log("ovo sam ja");
+        console.log(myself);
+        if(!myself){
+          this.logout();
+        }
+      }
+    });
+
+  }
+
+  login(name: string, pass: string): boolean {
     if (!this.user) {
       let find: User = this.dbService.allUsers.value.find(
         (o) => o.username === name && o.password === pass
       );
       if (find) {
         this.user = find;
-        this.storageService.setData('loginData', JSON.stringify(find));
+        this.storageService.setData(this.loginDataStorageKey, JSON.stringify(find));
         this.router.navigate(['mainApp/home']);
         return true;
       }
@@ -32,7 +46,7 @@ export class UserService {
   }
 
   logout() {
-    this.storageService.setData('loginData', '');
+    this.storageService.removeData(this.loginDataStorageKey);
     this.user = null;
     this.router.navigate(["log-reg"]);
   }

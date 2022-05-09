@@ -11,6 +11,18 @@ const routes: Routes = [
         loadChildren: () =>
           import('./pages/home/home.module').then((m) => m.HomePageModule),
       },
+      {
+        path: 'lobby',
+        loadChildren: () => import('./pages/lobby/lobby.module').then( m => m.LobbyPageModule)
+      },
+      {
+        path: 'account-settings',
+        loadChildren: () => import('./pages/account-settings/account-settings.module').then( m => m.AccountSettingsPageModule)
+      },
+      {
+        path: 'open-lobby',
+        loadChildren: () => import('./pages/open-lobby/open-lobby.module').then( m => m.OpenLobbyPageModule)
+      },
     ],
     canActivate: [AuthGuard],
   },
@@ -24,10 +36,8 @@ const routes: Routes = [
     loadChildren: () =>
       import('./pages/log-reg/log-reg.module').then((m) => m.LogRegPageModule),
   },
-  {
-    path: 'lobby',
-    loadChildren: () => import('./pages/lobby/lobby.module').then( m => m.LobbyPageModule)
-  },
+ 
+
 ];
 
 @NgModule({

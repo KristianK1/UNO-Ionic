@@ -1,0 +1,17 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>openLobby</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="screen">
+
+    <ion-item>
+      <ion-label position="floating">Enter new lobby's name</ion-label>
+      <ion-input type="text" [(ngModel)]="lobbyName"></ion-input>
+    </ion-item>
+
+    <ion-button (click)="makeLobby()">Make a new lobby</ion-button>
+  </div>
+</ion-content>

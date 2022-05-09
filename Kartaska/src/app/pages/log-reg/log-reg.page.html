@@ -1,28 +1,42 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>LogReg</ion-title>
-  </ion-toolbar>
-</ion-header>
-
 <ion-content>
-  <ion-item>
-    Register
-    <ion-toggle [(ngModel)]="mode"></ion-toggle>
-    Login
-  </ion-item>
+  <div style="width: 30%; min-width: 200px; margin:auto;">
+    <div style="margin: 20px 0px 20px 0px;">
+      <ion-img src="assets\images\UNO_Logo.svg.png"></ion-img>
+      <div *ngIf="mode==true">  
+        <ion-label><h1 class="logRegLabel">Login</h1></ion-label>  
+      </div>
+      <div *ngIf="mode==false">  
+        <ion-label><h1 class="logRegLabel">Register</h1></ion-label>  
+      </div>
+    </div>
 
-  <ion-input placeholder="Enter your username" [(ngModel)]="username_login"></ion-input>
-  <ion-input placeholder="Enter your password" type="password" [(ngModel)]="password_login"></ion-input>
-  
-  <div *ngIf="mode==true">
-    <ion-button (click)="login()">
-      Login
-    </ion-button>
-  </div>
+    <ion-item>
+      <ion-label position="floating">Enter your username</ion-label>
+      <ion-input [(ngModel)]="username_login"></ion-input>
+    </ion-item>
 
-  <div *ngIf="mode==false">
-    <ion-button (click)="register()">
-      Register
-    </ion-button>
+    <ion-item>
+      <ion-label position="floating">Enter your password</ion-label>
+      <ion-input type="password" [(ngModel)]="password_login"></ion-input>
+    </ion-item>
+
+    <ion-button *ngIf="mode==false" class = "imgInsertBt" (click)="insertImage()">Insert profile image</ion-button>
+    <ion-img *ngIf="mode==false && tempImg?.length> 5000" [src]="tempImgPrefix"></ion-img>
+    
+    <div *ngIf="mode==true">
+      <ion-button (click)="login()" class="logRegBt">
+        Login
+      </ion-button>
+    </div>
+
+    <div *ngIf="mode==false">
+      <ion-button (click)="register()" class="logRegBt">
+        Register
+      </ion-button>
+    </div>
+
+    <ion-button *ngIf="mode==true" (click)="changeMode(false)" fill="clear" class="changeModeBt">Register instead</ion-button>
+    <ion-button *ngIf="mode==false" (click)="changeMode(true)" fill="clear" class="changeModeBt">Login instead</ion-button>
+    
   </div>
 </ion-content>

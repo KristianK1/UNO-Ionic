@@ -3,7 +3,19 @@
     <ion-title>Lobby</ion-title>
   </ion-toolbar>
 </ion-header>
+  <ion-list>
+    <ion-item *ngFor="let player of myLobby.players" style="margin: 5px">
+      
+      <ion-fab-button>
+        <ion-img [src] ="player.userImageLink"></ion-img>
+      </ion-fab-button>
 
+      <ion-label style="margin-left: 5px;">
+        {{player.username}}
+      </ion-label>
+      
+    </ion-item>
+  </ion-list>
 <ion-content>
 
 </ion-content>

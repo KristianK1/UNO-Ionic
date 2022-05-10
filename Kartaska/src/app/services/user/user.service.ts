@@ -20,7 +20,11 @@ export class UserService {
 
     dbService.allUsers.subscribe(allUsers => {
       if(!!this.user.value){
-        let myself = allUsers.find( o => o.username === this.user.value.username && o.password === this.user.value.password);
+        let myself = allUsers.find( o => 
+          o.username === this.user.value.username && 
+          o.password === this.user.value.password &&
+          o.userUUID === this.user.value.userUUID
+        );
         console.log("ja u user servicu");
         console.log(this.user.value);
         console.log("ovo sam ja");
@@ -55,8 +59,8 @@ export class UserService {
     return false;
   }
 
-  logout() {
-    this.storageService.removeData(this.loginDataStorageKey);
+  async logout() {
+    await this.storageService.removeData(this.loginDataStorageKey);
     this.user.next(null);
     this.router.navigate(["log-reg"]);
   }

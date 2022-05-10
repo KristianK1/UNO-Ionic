@@ -1,9 +1,22 @@
-<ion-header>
+<!-- <ion-header>
   <ion-toolbar>
     <ion-title>accountSettings</ion-title>
   </ion-toolbar>
-</ion-header>
+</ion-header> -->
 
 <ion-content>
+  <div class="page">
+    <ion-img [src]="imageLink" class="image"></ion-img>
 
+    <ion-item>
+      <ion-label>
+        Username: <b>{{name}}</b>
+      </ion-label>
+    </ion-item>
+    <ion-item>
+      <ion-button (click) = "changePicture()">
+        Change your profile picture
+      </ion-button>
+    </ion-item>
+  </div>
 </ion-content>

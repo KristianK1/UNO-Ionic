@@ -1,5 +1,7 @@
-import { Component } from '@angular/core';
-import { MenuController, Platform } from '@ionic/angular';
+import { ChangeDetectorRef, Component } from '@angular/core';
+import { LoadingController, MenuController, Platform } from '@ionic/angular';
+import { loadingController } from '@ionic/core';
+import { User } from './interfaces/user';
 import { UserService } from './services/user/user.service';
 
 @Component({
@@ -14,15 +16,28 @@ export class AppComponent {
   isMobile: boolean;
   logiran: boolean;
 
+  user: User;
+  img: string;
+  
+
   constructor(
     private menuCtrl: MenuController,
     private platform: Platform,
     private userService: UserService,
-    ) {}
+    private changeDetector: ChangeDetectorRef,
+    ) {
+      this.appInit();
+    }
 
-  appInit(){
+
+  async appInit() {
+    console.log("app init");
+    await this.platform.ready();
+    
     this.platform.resize.subscribe( x => {
       let width: number = this.platform.width();
+      console.log("širina platforme je " + width);
+      
       if(width < 1000){
         this.showMenu = false;
         this.closeMenu();
@@ -35,12 +50,18 @@ export class AppComponent {
 
     this.userService.user.subscribe(user => {
       console.log("user update");
+      console.log(user);
       
+      this.user = user;
       this.logiran = !!user;
+      console.log("here");
+      this.changeDetector.detectChanges();
     })
 
     this.isMobile = this.platform.is('mobileweb') || this.platform.is('mobile');
+    
     let width: number = this.platform.width();
+    
     if(width < 1000){
       this.showMenu = false;
       this.closeMenu();

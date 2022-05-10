@@ -61,6 +61,10 @@ export class DatabaseService {
     }
   }
 
+  async changeProfilePictureLink(user: User, link: string){
+    await set(ref(this.database, "users/" + user.username + "/userImageLink"), link);
+  }
+
 
   createReferenceToUsers() {
     onValue(ref(this.database, 'users'), (snapshot) => {
@@ -82,7 +86,7 @@ export class DatabaseService {
             allUsers.push(temp);
           }
           console.log(allUsers);
-          
+
           this.allUsers.next(allUsers);
           this.dbConnection.next(true);
         }

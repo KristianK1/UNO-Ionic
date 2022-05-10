@@ -23,7 +23,9 @@ export class HomePage {
 
   ngOnInit(){
     this.databaseService.allLobbys.subscribe(rez => {
-      this.allLobbys = rez;
+      console.log("novi lobby-i");
+      console.log(rez);
+      this.allLobbys = rez || [];
     })
   }
 

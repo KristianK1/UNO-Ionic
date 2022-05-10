@@ -17,8 +17,8 @@ import { v4 as uuidv4 } from 'uuid';
 export class LogRegPage implements OnInit {
 
   mode: boolean = true;
-  username_login: string = '';
-  password_login: string = '';
+  username_login: string = 'sviki';
+  password_login: string = 'sviki';
 
   fileName: string;
   tempImg: string = "";
@@ -53,6 +53,7 @@ export class LogRegPage implements OnInit {
         } catch { }
       }
     });
+
   }
 
   changeMode(newMode: boolean) {

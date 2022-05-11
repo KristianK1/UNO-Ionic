@@ -31,6 +31,7 @@ export class OpenLobbyPage implements OnInit {
     newLobby.lobbyUUID = uuidv4();
     newLobby.lobbyName = this.lobbyName;
     newLobby.players = [];
+    newLobby.messages = [];
     let me: User = this.userService.user.value;
     me = JSON.parse(JSON.stringify(me));
     me.password = null;
@@ -39,15 +40,18 @@ export class OpenLobbyPage implements OnInit {
     newLobby.players.push(me);
     newLobby.adminUUID = me.userUUID;
 
-    let allLobbys: Lobby[] = this.databaseService.allLobbys.value;
-    let copyLobby = allLobbys.find(o => o.lobbyName === newLobby.lobbyName);
+    await this.databaseService.getAllLobbysManually();
+
+    let copyLobby = this.databaseService.allLobbys.value.find(o => o.lobbyName === newLobby.lobbyName);
+    
     if(!!copyLobby){
       console.log("Postoji lobby sa istim imenom!");
       alert("Postoji lobby sa istim imenom!")
       return; 
     }
+
     await this.databaseService.insertNewLobby(newLobby);
-    this
+    
     this.lobbyName = "";
     this.lobbyService.currentLobbyUUID.next(newLobby.lobbyUUID);
     this.router.navigate(['mainApp/lobby']);

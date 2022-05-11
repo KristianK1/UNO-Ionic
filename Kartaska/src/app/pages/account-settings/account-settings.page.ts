@@ -48,4 +48,9 @@ export class AccountSettingsPage implements OnInit {
 
   }
 
+  async deleteAccount(){
+    await this.databaseService.deleteUser(this.userService.user.value);
+    await this.fireStorageService.deleteImage(this.userService.user.value.userImageLink);
+  }
+
 }

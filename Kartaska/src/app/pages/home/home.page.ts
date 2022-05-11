@@ -29,6 +29,17 @@ export class HomePage {
     })
   }
 
+  ionViewWillEnter(){
+    console.log("on resume");
+    this.databaseService.createReferenceToAllLobbys();
+  }
+
+  ionViewWillLeave(){
+    console.log("on pause");
+    
+    this.databaseService.removeReferenceFromAllLobbys();
+  }
+
   joinLobby(lobbyUUID: string){
     console.log("joined lobby " + lobbyUUID);
     let me: User = this.userService.user.value;

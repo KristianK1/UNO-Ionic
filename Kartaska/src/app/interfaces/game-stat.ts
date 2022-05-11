@@ -1,7 +1,7 @@
 import { User } from "./user";
 
 export interface GameStat {
-    ganeUUID: string,
+    gameUUID: string,
     gameStarted: string,
     gameEnded: string,
     reasonForEnd: string,

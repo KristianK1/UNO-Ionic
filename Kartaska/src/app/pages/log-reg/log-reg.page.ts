@@ -5,8 +5,6 @@ import { DatabaseService } from 'src/app/services/database/database.service';
 import { FireStorageService } from 'src/app/services/fireStorage/fire-storage.service';
 import { StorageService } from 'src/app/services/storage/storage.service';
 import { UserService } from 'src/app/services/user/user.service';
-import { PassThrough } from 'stream';
-
 import { v4 as uuidv4 } from 'uuid';
 
 @Component({
@@ -23,9 +21,6 @@ export class LogRegPage implements OnInit {
   fileName: string;
   tempImg: string = "";
   tempImgPrefix: string; //TODO try to remove this variable
-
-  basicImageUrl: string = 'https://firebasestorage.googleapis.com/v0/b/webprogprojekt.appspot.com/o/avatardefault_92824.png?alt=media&token=a3054da1-1d82-4490-80e7-85db058e8795';
-
 
   constructor(
     private userService: UserService,
@@ -74,12 +69,8 @@ export class LogRegPage implements OnInit {
     let newUUID = uuidv4();
     if (this.username_login.length >= 5 && this.password_login.length >= 5) {
       let imageUrl: string;
-      if (this.tempImg === "") {
-        imageUrl = this.basicImageUrl;
-      }
-      else {
-        imageUrl = await this.fireStorageService.uploadImage(newUUID, this.tempImg);
-      }
+
+      imageUrl = await this.fireStorageService.uploadImage(newUUID, this.tempImg);
       console.log(imageUrl);
 
 

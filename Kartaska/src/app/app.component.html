@@ -1,19 +1,19 @@
 a
 
 <ion-app>
-    <ion-menu [hidden]="logiran === false" side="end" menuId="first" contentId="main">
+    <ion-menu [disabled]="!logiran" side="end" menuId="first" contentId="main">
 
       <ion-header>
         <ion-toolbar>
-          <ion-item *ngIf ="!!user" style="margin-top: 10px; margin-bottom: 10px;">
+          <ion-item style="margin-top: 10px; margin-bottom: 10px;">
 
-            <ion-fab-button *ngIf="user?.userImageLink?.length > 10">
-              <ion-img [src]="user.userImageLink"></ion-img>
+            <ion-fab-button>
+              <ion-img [src]="user?.userImageLink"></ion-img>
             </ion-fab-button>
 
             <ion-item>
               <h3>
-                {{user.username}}
+                {{user?.username}}
               </h3>
             </ion-item>
 

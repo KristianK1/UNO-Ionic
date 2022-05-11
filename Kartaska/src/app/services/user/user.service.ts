@@ -34,7 +34,6 @@ export class UserService {
         }
       }
     });
-
   }
 
   login(name: string, pass: string): boolean {

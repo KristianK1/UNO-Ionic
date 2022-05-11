@@ -5,17 +5,29 @@
 </ion-header>
   
 <ion-content>
-  <ion-list>
-    <ion-item *ngFor="let player of myLobby.players" style="margin: 5px">
-      
-      <ion-fab-button>
-        <ion-img [src] ="player.userImageLink"></ion-img>
-      </ion-fab-button>
+  
+  <ion-grid>
+    <ion-row>
+      <ion-col *ngFor="let player of myLobby.players" sizeLg="3" sizeMd="4" sizeSm="6">
+        <ion-item  style="margin: 5px">
+          
+          <ion-fab-button>
+            <ion-img [src] ="player.userImageLink"></ion-img>
+          </ion-fab-button>
 
-      <ion-label style="margin-left: 15px;">
-        {{player.username}}
-      </ion-label>
-      
-    </ion-item>
-  </ion-list>
+          <ion-label style="margin-left: 15px;">
+            {{player.username}}
+          </ion-label>
+          
+        </ion-item>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+
+  <ion-item>
+    <ion-input (keyup.enter)="onEnter()" type="text" [(ngModel)]="newMessage" placeholder="Enter your message"></ion-input>
+  </ion-item>
+
+
 </ion-content>

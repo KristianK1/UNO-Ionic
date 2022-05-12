@@ -1,4 +1,5 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { onLog } from 'firebase/app';
 import { CameraService } from 'src/app/services/camera/camera.service';
 import { DatabaseService } from 'src/app/services/database/database.service';
@@ -21,6 +22,7 @@ export class AccountSettingsPage implements OnInit {
     private databaseService: DatabaseService,
     private fireStorageService: FireStorageService,
     private changeDetector: ChangeDetectorRef,
+    private router: Router,
   ) { }
 
   ngOnInit() {
@@ -51,6 +53,7 @@ export class AccountSettingsPage implements OnInit {
   async deleteAccount(){
     await this.databaseService.deleteUser(this.userService.user.value);
     await this.fireStorageService.deleteImage(this.userService.user.value.userImageLink);
+    await this.userService.logout();
   }
 
 }

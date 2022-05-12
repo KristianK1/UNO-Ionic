@@ -3,11 +3,13 @@ import { initializeApp } from 'firebase/app';
 
 import { getDatabase, ref, set, Database, onValue, child, get, Unsubscribe } from "firebase/database";
 import { BehaviorSubject } from 'rxjs';
+import { Game } from 'src/app/interfaces/game';
+import { GameStat } from 'src/app/interfaces/game-stat';
 import { Lobby } from 'src/app/interfaces/lobby';
 import { Message } from 'src/app/interfaces/message';
 import { User } from 'src/app/interfaces/user';
 import { environment } from 'src/environments/environment.prod';
-
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable({
   providedIn: 'root'
@@ -66,16 +68,17 @@ export class DatabaseService {
 
   async joinLobby(user: User, lobbyUUID: string){
     user.password = null;
-
     let allLobbys = this.allLobbys.value;
     for(let i = 0; i<allLobbys.length; i++){
       if(allLobbys[i].lobbyUUID === lobbyUUID){
         let findPlayer: User = allLobbys[i].players.find(o => o.userUUID === user.userUUID);
         if(!findPlayer){
           allLobbys[i].players.push(user);
-          this.myLobby.next(allLobbys[i]);
-          set(ref(this.database, 'lobbys/' + lobbyUUID + "/players"), allLobbys[i].players);
+          this.myLobby.next(JSON.parse(JSON.stringify(allLobbys[i])));
+          await set(ref(this.database, 'lobbys/' + lobbyUUID + "/players"), allLobbys[i].players);
         }
+        //await this.getLobbyManually(lobbyUUID);
+        await this.createReferenceToLobby(lobbyUUID);
         return;
       }
     }
@@ -98,7 +101,7 @@ export class DatabaseService {
 
       const DataBase_Users_data = (snapshot.val());
 
-      console.log("Novi podaci iz baze");
+      console.log("Novi podaci iz baze - USERI");
       console.log(DataBase_Users_data);
 
       if (DataBase_Users_data) {
@@ -107,8 +110,6 @@ export class DatabaseService {
           let keys = Object.keys(DataBase_Users_data);
 
           for (let i: number = 0; i < keys.length; i++) {
-            console.log("citanje " + i);
-            
             let temp: User = DataBase_Users_data[keys[i]];
             allUsers.push(temp);
           }
@@ -175,19 +176,25 @@ export class DatabaseService {
     }
   }
 
-  createReferenceToLobby(UUID: Lobby){
-    this.refToMyLobby = onValue(ref(this.database, 'lobbys'), (snapshot) => {
+  createReferenceToLobby(UUID: string){
+    console.log("stvaram referencu na moj lobby ", UUID);
+    
+    this.refToMyLobby = onValue(ref(this.database, 'lobbys/'+ UUID), async (snapshot) => {
       const data = (snapshot.val());
-
+      console.log("new data for my lobby");
       if(!data) return;
 
       try{
         this.myLobby.next(data);
       }
       catch{
-        console.log("single lobby cast failed");
+        console.log("single lobby update cast failed");
       }
-    });
+    },
+    {
+      onlyOnce: false
+    }
+    );
   }
 
   removeReferenceFromLobby(){
@@ -224,5 +231,48 @@ export class DatabaseService {
       }
     }
   }
+
+  async getLobbyManually(lobbyUUID: string) {
+    let snapshot = await get(child(ref(this.database), `lobbys/` + lobbyUUID));
+    const DataBase_Lobby_data = (snapshot.val());
+
+    if (DataBase_Lobby_data) {
+      try {
+        let temp: Lobby = DataBase_Lobby_data;
+        this.myLobby.next(temp);
+      }
+      catch{
+        console.log("GREŠKA PRI ČITANJU IZ BAZE");
+        this.myLobby.next(null);
+        this.dbConnection.next(false); //TODO ????
+      }
+    }
+  }
+
+
+  async removePlayerFromLobby(lobbyUUID: string, userUUID: string){
+    //check jel lobby postoji
+
+    let players = this.myLobby.value.players.filter( o => o.userUUID !== userUUID);
+    await set(ref(this.database, "lobbys/" + lobbyUUID + "/players"), players);
+  }
+  
+  createGame() {
+    let newGame: Game;
+    newGame.gameUUID = uuidv4();
+    newGame.gameStat = <GameStat>{};
+    //in progress
+  }
+
+
+  whichLobbyDoIBelong(playerUUID: string): string{
+    for(let lobby of this.allLobbys.value){
+      let findMe: User = lobby.players.find(o => o.userUUID === playerUUID);
+      if(!!findMe) return lobby.lobbyUUID;
+    }
+    return null;
+  }
+
+
 
 }

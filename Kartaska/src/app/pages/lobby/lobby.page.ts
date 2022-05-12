@@ -1,9 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { Lobby } from 'src/app/interfaces/lobby';
 import { Message } from 'src/app/interfaces/message';
+import { User } from 'src/app/interfaces/user';
 import { DatabaseService } from 'src/app/services/database/database.service';
 import { LobbyService } from 'src/app/services/lobby/lobby.service';
 import { UserService } from 'src/app/services/user/user.service';
+import { LogRegPage } from '../log-reg/log-reg.page';
 
 @Component({
   selector: 'app-lobby',
@@ -12,8 +14,8 @@ import { UserService } from 'src/app/services/user/user.service';
 })
 export class LobbyPage implements OnInit {
 
-  currentLobbyUUID: string;
   myLobby: Lobby;
+  me: User;
 
   isAdmin: boolean;
 
@@ -26,21 +28,32 @@ export class LobbyPage implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.lobbyService.currentLobbyUUID.subscribe(rez => {
-      this.currentLobbyUUID = rez;
-    })
-    this.databaseService.allLobbys.subscribe(rez => {
-      if(!this.currentLobbyUUID) return;
-      this.myLobby = rez.find(o => o.lobbyUUID === this.currentLobbyUUID);
-      if(!this.myLobby) return;
 
-      this.currentLobbyUUID = this.myLobby.lobbyUUID;
+    this.userService.user.subscribe( rez => {
+      this.me = rez;
+    });
+
+    this.databaseService.myLobby.subscribe(rez => {
+      console.log("aaaaaaaa");
+      console.log(rez);
+      
+      
+      this.myLobby = rez;
+      if(!this.myLobby) return;
+      console.log("ovo je moj lobby");
+      console.log(this.myLobby);
+      
+      
+
       if(this.myLobby.adminUUID === this.userService.user.value.userUUID){
         this.isAdmin = true;
+
       }
       else{
         this.isAdmin = false;
       }
+
+
 
     });
   }
@@ -51,8 +64,15 @@ export class LobbyPage implements OnInit {
     message.text = this.newMessage;
     message.userUUID = this.userService.user.value.userUUID;
     message.timeStamp = new Date().toISOString();
-    this.databaseService.sendMessage(message, this.currentLobbyUUID);
+    this.databaseService.sendMessage(message, this.myLobby.lobbyUUID);
     this.newMessage = "";
   }
 
+  async kickPlayer(userUUID: string){
+    this.databaseService.removePlayerFromLobby(this.myLobby.lobbyUUID, userUUID);
+  }
+
+  startGame(){
+    this.databaseService.createGame();
+  }
 }

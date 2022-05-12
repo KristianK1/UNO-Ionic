@@ -14,6 +14,7 @@ import { UserService } from 'src/app/services/user/user.service';
 export class HomePage {
 
   allLobbys: Lobby[] = [];
+
   constructor(
     private userService: UserService,
     private databaseService: DatabaseService,
@@ -24,6 +25,8 @@ export class HomePage {
   ngOnInit(){
     this.databaseService.allLobbys.subscribe(rez => {
       console.log("novi lobby-i");
+      let myLobbyUUID = this.databaseService.whichLobbyDoIBelong(this.userService.user.value?.userUUID);
+      if(!!myLobbyUUID) this.joinLobby(myLobbyUUID);
       console.log(rez);
       this.allLobbys = rez || [];
     })
@@ -40,14 +43,8 @@ export class HomePage {
     this.databaseService.removeReferenceFromAllLobbys();
   }
 
-  joinLobby(lobbyUUID: string){
-    console.log("joined lobby " + lobbyUUID);
-    let me: User = this.userService.user.value;
-    me = JSON.parse(JSON.stringify(me));
-    me.password = null; 
-    this.databaseService.joinLobby(me, lobbyUUID);
-    this.lobbyService.currentLobbyUUID.next(lobbyUUID);
-    this.router.navigate(["mainApp/lobby"]);
+  async joinLobby(lobbyUUID: string){
+    await this.lobbyService.joinLobby(lobbyUUID);
   }
 
 

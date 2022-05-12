@@ -1,9 +1,10 @@
 import { GameStat } from "./game-stat";
-import { Move } from "./move";
+import { Card } from "./card";
 import { User } from "./user";
 
 export interface Game {
-    moves: Move[],
-    activePlayers: User[],
+    moves: Card[],
     gameStat: GameStat,
+    gameUUID: string;
+    cardOrder: number[];
 }

@@ -53,7 +53,6 @@ export class OpenLobbyPage implements OnInit {
     await this.databaseService.insertNewLobby(newLobby);
     
     this.lobbyName = "";
-    this.lobbyService.currentLobbyUUID.next(newLobby.lobbyUUID);
     this.router.navigate(['mainApp/lobby']);
   }
 

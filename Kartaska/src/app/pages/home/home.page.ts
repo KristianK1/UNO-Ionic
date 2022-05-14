@@ -39,7 +39,6 @@ export class HomePage {
 
   ionViewWillLeave(){
     console.log("on pause");
-    
     this.databaseService.removeReferenceFromAllLobbys();
   }
 

@@ -8,6 +8,7 @@ import { GameStat } from 'src/app/interfaces/game-stat';
 import { Lobby } from 'src/app/interfaces/lobby';
 import { Message } from 'src/app/interfaces/message';
 import { User } from 'src/app/interfaces/user';
+import { Hand } from 'src/app/interfaces/hand';
 import { environment } from 'src/environments/environment.prod';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -61,9 +62,13 @@ export class DatabaseService {
     }
   }
 
+  async removeLobby(lobbyUUID: string){
+    await set(ref(this.database, "lobbys/" + lobbyUUID), null);
+  }
+
   async insertNewLobby(lobby: Lobby){
     await set(ref(this.database, 'lobbys/' + lobby.lobbyUUID), lobby);
-    return true;
+    this.createReferenceToLobby(lobby.lobbyUUID);
   }
 
   async joinLobby(user: User, lobbyUUID: string){
@@ -78,7 +83,7 @@ export class DatabaseService {
           await set(ref(this.database, 'lobbys/' + lobbyUUID + "/players"), allLobbys[i].players);
         }
         //await this.getLobbyManually(lobbyUUID);
-        await this.createReferenceToLobby(lobbyUUID);
+        this.createReferenceToLobby(lobbyUUID);
         return;
       }
     }
@@ -88,13 +93,13 @@ export class DatabaseService {
     await set(ref(this.database, "users/" + user.username + "/userImageLink"), link);
   }
 
-  sendMessage(mess: Message, lobbyUUID: string){
-    let currMessages: Message[] = this.myLobby?.value.messages;
-    if(!currMessages) currMessages = [];
-    currMessages.push(mess);
+  // sendMessage(mess: Message, lobbyUUID: string){
+  //   let currMessages: Message[] = this.myLobby?.value.messages;
+  //   if(!currMessages) currMessages = [];
+  //   currMessages.push(mess);
 
-    set(ref(this.database, "lobbys/"+ lobbyUUID + "/messages"), currMessages);
-  }
+  //   set(ref(this.database, "lobbys/"+ lobbyUUID + "/messages"), currMessages);
+  // }
 
   createReferenceToAllUsers() {
     onValue(ref(this.database, 'users'), (snapshot) => {
@@ -146,6 +151,7 @@ export class DatabaseService {
 
           for (let i: number = 0; i < keys.length; i++) {
             let temp: Lobby = DataBase_Lobbys_data[keys[i]];
+            if(!temp.players) temp.players = [];
             allLobbys.push(temp);
           }
           console.log(allLobbys);
@@ -180,10 +186,13 @@ export class DatabaseService {
     console.log("stvaram referencu na moj lobby ", UUID);
     
     this.refToMyLobby = onValue(ref(this.database, 'lobbys/'+ UUID), async (snapshot) => {
-      const data = (snapshot.val());
+      const data: Lobby = (snapshot.val());
       console.log("new data for my lobby");
+      console.log(data);
+      
       if(!data) return;
 
+      if(!data.players) data.players = [];
       try{
         this.myLobby.next(data);
       }
@@ -251,17 +260,37 @@ export class DatabaseService {
 
 
   async removePlayerFromLobby(lobbyUUID: string, userUUID: string){
-    //check jel lobby postoji
-
-    let players = this.myLobby.value.players.filter( o => o.userUUID !== userUUID);
+    //TODO check jel lobby postoji
+     let players = this.myLobby.value.players.filter( o => o.userUUID !== userUUID);
     await set(ref(this.database, "lobbys/" + lobbyUUID + "/players"), players);
   }
   
-  createGame() {
-    let newGame: Game;
+  async createGame(lobbyUUID: string) {
+    let newGame: Game = <Game>{};
     newGame.gameUUID = uuidv4();
     newGame.gameStat = <GameStat>{};
-    //in progress
+    newGame.moves = [];
+    newGame.cardOrder = [];
+    for(let i = 0; i<108; i++){
+      newGame.cardOrder.push(i);
+    }
+    newGame.playerCards = [];
+    for(let i = 0; i<this.myLobby.value.players.length; i++){
+      let hand: Hand = <Hand>{};
+      hand.userUUID = this.myLobby.value.players[i].userUUID;
+      
+      let cards: number[] = [];
+      for(let j = 0; j<7; j++){
+        cards.push(newGame.cardOrder[7*i+j]);
+      }
+      hand.cards = cards;
+      newGame.playerCards.push(hand)
+    }
+
+    await set(ref(this.database, "lobbys/" + lobbyUUID + "/gameUUID"), newGame.gameUUID);
+    await set(ref(this.database, "games/" + newGame.gameUUID), newGame);
+    
+
   }
 
 
@@ -273,6 +302,10 @@ export class DatabaseService {
     return null;
   }
 
+  async alterLobbyAdmin(lobbyUUID: string, userUUID: string){
+    //TODO add check does lobby exists
+    await set(ref(this.database, "lobbys/" + lobbyUUID + "/adminUUID"), userUUID);
+  }
 
 
 }

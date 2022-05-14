@@ -34,10 +34,14 @@ a
             </ion-label>
           </ion-item>
     
-          <ion-item (click)="closeMenu()" [routerLink]="['mainApp/home']">
+          <ion-item (click)="closeMenu()" [routerLink]="['mainApp/home']" [disabled]="!allowHomePage">
             <ion-label>
               Popis svih Lobbya
           </ion-label>
+          </ion-item>
+
+          <ion-item *ngIf="!allowHomePage" (click)="leaveLobby()">
+            Izađi iz Lobby-a
           </ion-item>
     
           <ion-item (click)="closeMenu()" [routerLink]="['mainApp/account-settings']" >

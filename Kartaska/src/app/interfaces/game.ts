@@ -1,10 +1,11 @@
 import { GameStat } from "./game-stat";
-import { Card } from "./card";
-import { User } from "./user";
+import { Hand } from "./hand";
+import { StringFormat } from "@angular/fire/compat/storage/interfaces";
 
 export interface Game {
-    moves: Card[],
+    moves: number[],
     gameStat: GameStat,
-    gameUUID: string;
-    cardOrder: number[];
+    gameUUID: StringFormat,
+    cardOrder: number[],
+    playerCards: Hand[],
 }

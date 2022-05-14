@@ -11,7 +11,7 @@
   <ion-list>
     <ion-item *ngFor="let lobby of allLobbys">
       <ion-label>{{lobby.lobbyName}}</ion-label>
-      <ion-button (click)="joinLobby(lobby.lobbyUUID)">Join lobby</ion-button>
+      <ion-button [disabled]="!!lobby.gameUUID" (click)="joinLobby(lobby.lobbyUUID)">Join lobby</ion-button>
     </ion-item>
 
   </ion-list>

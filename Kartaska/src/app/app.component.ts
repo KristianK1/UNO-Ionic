@@ -1,7 +1,10 @@
 import { ChangeDetectorRef, Component } from '@angular/core';
+import { Router } from '@angular/router';
 import { LoadingController, MenuController, Platform } from '@ionic/angular';
 import { loadingController } from '@ionic/core';
 import { User } from './interfaces/user';
+import { DatabaseService } from './services/database/database.service';
+import { LobbyService } from './services/lobby/lobby.service';
 import { UserService } from './services/user/user.service';
 
 @Component({
@@ -19,14 +22,29 @@ export class AppComponent {
   user: User;
   img: string;
   
+  allowHomePage: boolean = true;
 
   constructor(
     private menuCtrl: MenuController,
     private platform: Platform,
     private userService: UserService,
     private changeDetector: ChangeDetectorRef,
+    private databaseService: DatabaseService,
+    private router: Router,
+    private lobbyService: LobbyService,
     ) {
       this.appInit();
+
+      this.databaseService.myLobby.subscribe(rez => {
+        //TODO mozda napravit boolean myLobbyExists da se ovo ne trigera stalno
+          console.log("app comp bool change");
+          console.log(rez);
+          
+          
+          this.allowHomePage = !rez;
+          console.log(this.allowHomePage);
+          
+      })
     }
 
 
@@ -76,7 +94,6 @@ export class AppComponent {
   logout(){
     this.closeMenu();
     this.userService.logout();
-    
   }
 
   openMenu(){
@@ -85,5 +102,9 @@ export class AppComponent {
   
   closeMenu(){
     this.menuCtrl.close();
+  }
+
+  async leaveLobby(){
+    this.lobbyService.leaveLobby();
   }
 }

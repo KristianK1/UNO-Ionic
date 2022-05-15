@@ -4,20 +4,29 @@ import { BehaviorSubject } from 'rxjs';
 import { User } from 'src/app/interfaces/user';
 import { DatabaseService } from '../database/database.service';
 import { StorageService } from '../storage/storage.service';
+import { v4 as uuidv4 } from 'uuid';
+import { UselessService } from '../useless/useless.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class UserService {
   user: BehaviorSubject<User> = new BehaviorSubject<User>(null);
-  loginDataStorageKey: string = 'loginData';
+  loginDataStorageKey: string = 'CardGame_loginData';
+  loginRequestUUID: string;
 
   constructor(
     private dbService: DatabaseService,
     private router: Router,
     private storageService: StorageService,
+    private uselessService: UselessService,
   ) {
-
+    this.uselessService.loginReqFailed.subscribe(rez => {
+      if(rez === true){
+        this.loginReqFailed();
+      }
+    })
+    this.loginRequestUUID = uuidv4();
     dbService.allUsers.subscribe(allUsers => {
       if(!!this.user.value){
         let myself = allUsers.find( o => 
@@ -36,7 +45,7 @@ export class UserService {
     });
   }
 
-  login(name: string, pass: string): boolean {
+  async login(name: string, pass: string): Promise<boolean> {
     console.log("idem se logirat");
     console.log("svi korisnici");
     console.log(this.dbService.allUsers.value);
@@ -49,10 +58,39 @@ export class UserService {
       if (find) {
         console.log("nasao korisnika sa tim credsima");
         
-        this.user.next(find);
-        this.storageService.setData(this.loginDataStorageKey, JSON.stringify(find));
-        this.router.navigate(['mainApp/home']);
-        return true;
+        this.user.next(find); //ide prije?
+
+        //double login provjera
+        let haveToWait: boolean = false;
+        if(await this.dbService.LoginReqsExist(this.user.value.userUUID)){
+          haveToWait = true;
+          console.log("moram cekat");
+        }
+        else console.log("ne moram cekati");
+        
+        
+        this.dbService.createRefrenceToMyUserLoginRequests(this.user.value.userUUID);
+        await this.dbService.makeLoginRequest(find.userUUID, this.loginRequestUUID);
+        if(haveToWait === true){
+          setTimeout(() =>{
+            if(!!this.user.value){ 
+              this.storageService.setData(this.loginDataStorageKey, JSON.stringify(find));
+              this.dbService.checkMyUserLoginRequestsManually(this.user.value.userUUID);
+              this.router.navigate(['mainApp/home']);
+              this.dbService.canRemoveLoginRequests = true;
+              return true;
+            }
+            return false;
+          }, 2000);
+        }
+        else{
+          this.storageService.setData(this.loginDataStorageKey, JSON.stringify(find));
+          this.dbService.checkMyUserLoginRequestsManually(this.user.value.userUUID); // ovo ne treba
+          this.router.navigate(['mainApp/home']);
+          this.dbService.canRemoveLoginRequests = true;
+          return true;
+        }
+
       }
     }
     return false;
@@ -60,6 +98,18 @@ export class UserService {
 
   async logout() {
     await this.storageService.removeData(this.loginDataStorageKey);
+    this.dbService.canRemoveLoginRequests = false;
+    this.dbService.removeRefrenceToMyUserLoginRequests();
+    this.dbService.removeMyLoginRequest(this.user.value.userUUID);
+    this.user.next(null);
+    this.router.navigate(["log-reg"]);
+  }
+
+  async loginReqFailed(){
+    console.log("loq req failed userService");
+    await this.storageService.removeData(this.loginDataStorageKey);
+    this.dbService.canRemoveLoginRequests = false;
+    this.dbService.removeRefrenceToMyUserLoginRequests();
     this.user.next(null);
     this.router.navigate(["log-reg"]);
   }

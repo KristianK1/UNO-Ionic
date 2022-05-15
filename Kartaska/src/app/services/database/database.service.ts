@@ -6,11 +6,11 @@ import { BehaviorSubject } from 'rxjs';
 import { Game } from 'src/app/interfaces/game';
 import { GameStat } from 'src/app/interfaces/game-stat';
 import { Lobby } from 'src/app/interfaces/lobby';
-import { Message } from 'src/app/interfaces/message';
 import { User } from 'src/app/interfaces/user';
 import { Hand } from 'src/app/interfaces/hand';
 import { environment } from 'src/environments/environment.prod';
 import { v4 as uuidv4 } from 'uuid';
+import { UselessService } from '../useless/useless.service';
 
 @Injectable({
   providedIn: 'root'
@@ -26,8 +26,14 @@ export class DatabaseService {
   app: any;
   refToLobbys: Unsubscribe;
   refToMyLobby: Unsubscribe;
+  refToMyLoginRequests: Unsubscribe;
+  myLoginRequestUUID: string;
 
-  constructor() {
+  canRemoveLoginRequests: boolean = false;
+
+  constructor(
+    private uselessService: UselessService,
+  ) {
     this.app = initializeApp(environment.firebaseConfig);
     this.database = getDatabase();
     this.createReferenceToAllUsers();
@@ -307,5 +313,93 @@ export class DatabaseService {
     await set(ref(this.database, "lobbys/" + lobbyUUID + "/adminUUID"), userUUID);
   }
 
+  async makeLoginRequest(userUUID: string, requestUUID: string){
+    this.myLoginRequestUUID = requestUUID;
+    await set(ref(this.database, "loginRequests/"+userUUID + "/" + requestUUID), true);
+  }
 
+  async createRefrenceToMyUserLoginRequests(userUUID: string){
+    if(!!this.refToMyLoginRequests) this.refToMyLoginRequests();
+    try{
+      this.refToMyLoginRequests = onValue(ref(this.database, "loginRequests/"+userUUID), async (snapshot) => {
+        const loginReqData = (snapshot.val());
+
+        if(loginReqData){
+          console.log("New log req data");
+          let keys = Object.keys(loginReqData);
+          let haveBeenKicked = true;
+          for (let i: number = 0; i < keys.length; i++) {
+            let temp: boolean = loginReqData[keys[i]];
+            console.log("login REQ br " + i + " " + keys[i]);
+            if(keys[i] == this.myLoginRequestUUID) haveBeenKicked = false;
+            else{
+              if(this.canRemoveLoginRequests === true){
+                console.log("uklanjam request " + keys[i]);
+                await set(ref(this.database, "loginRequests/"+userUUID+"/" + keys[i]), null);
+              }
+            }
+          }
+
+          if(haveBeenKicked === true) {
+            this.uselessService.loginReqFailed.next(true);
+            console.log("kickan sam");
+          }      
+          
+        }
+        
+      },
+      {
+        onlyOnce: false
+      }
+      );
+    }
+    catch(e){
+      console.log("DB error");
+      console.log(e);
+    }
+  }
+
+  async checkMyUserLoginRequestsManually(userUUID: string){
+      let snapshot = await get(child(ref(this.database), "loginRequests/"+userUUID));
+      const loginReqData = snapshot.val();
+
+      if(loginReqData){
+        console.log("New log req data");
+        let keys = Object.keys(loginReqData);
+        let haveBeenKicked = true;
+        for (let i: number = 0; i < keys.length; i++) {
+          let temp: boolean = loginReqData[keys[i]];
+          console.log("login REQ br " + i + " " + keys[i]);
+          if(keys[i] == this.myLoginRequestUUID) haveBeenKicked = false;
+          else{
+            if(this.canRemoveLoginRequests === true){
+              console.log("uklanjam request " + keys[i]);
+              await set(ref(this.database, "loginRequests/"+userUUID+"/" + keys[i]), null);
+            }
+          }
+        }
+
+        if(haveBeenKicked === true) {
+          this.uselessService.loginReqFailed.next(true);
+          console.log("kickan sam");
+        }      
+        
+      }
+  }
+
+  async removeMyLoginRequest(userUUID: string){
+    //reqUUID se nalazi u database servisu
+    await set(ref(this.database, "loginRequests/"+userUUID+"/" + this.myLoginRequestUUID), null);
+  }
+  async LoginReqsExist(userUUID: string){
+    let snapshot = await get(child(ref(this.database), `loginRequests/` + userUUID));
+    console.log("login reqs exist");
+    console.log(snapshot.val());
+    
+    return !!snapshot.val();
+  }
+
+  async removeRefrenceToMyUserLoginRequests(){
+    if(!!this.refToMyLoginRequests) this.refToMyLoginRequests();
+  }
 }

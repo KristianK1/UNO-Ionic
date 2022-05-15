@@ -6,6 +6,7 @@ import { FireStorageService } from 'src/app/services/fireStorage/fire-storage.se
 import { StorageService } from 'src/app/services/storage/storage.service';
 import { UserService } from 'src/app/services/user/user.service';
 import { v4 as uuidv4 } from 'uuid';
+import { LoadingController } from '@ionic/angular';
 
 @Component({
   selector: 'app-log-reg',

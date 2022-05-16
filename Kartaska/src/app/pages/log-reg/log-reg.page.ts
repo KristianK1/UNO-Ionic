@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { User } from 'src/app/interfaces/user';
 import { CameraService } from 'src/app/services/camera/camera.service';
 import { DatabaseService } from 'src/app/services/database/database.service';
@@ -13,7 +13,7 @@ import { LoadingController } from '@ionic/angular';
   templateUrl: './log-reg.page.html',
   styleUrls: ['./log-reg.page.scss'],
 })
-export class LogRegPage implements OnInit {
+export class LogRegPage implements OnInit, OnDestroy {
 
   mode: boolean = true;
   username_login: string = 'sviki';
@@ -22,42 +22,80 @@ export class LogRegPage implements OnInit {
   fileName: string;
   tempImg: string = "";
   tempImgPrefix: string; //TODO try to remove this variable
+  loadingContPopup: HTMLIonLoadingElement;
 
   constructor(
     private userService: UserService,
     private databaseService: DatabaseService,
     private storageService: StorageService,
     private cameraService: CameraService,
-    private fireStorageService: FireStorageService
+    private fireStorageService: FireStorageService,
+    public loadingController: LoadingController,
   ) { }
 
   async ngOnInit() {
-    this.databaseService.dbConnection.subscribe(async (rez) => {
-      if (rez === true) {
+    this.databaseService.allUsers.subscribe(async (rez) => {
+      if (!!rez) {
         try {
           console.log('hello');
 
           let data: string = await this.storageService.getData(this.userService.loginDataStorageKey);
+          if(!!data){
+            let possibleUser: User = JSON.parse(data);
+            console.log(possibleUser);
 
-          let possibleUser: User = JSON.parse(data);
-          console.log(possibleUser);
-
-          this.userService.login(
-            possibleUser.username,
-            possibleUser.password
-          );
+            this.login(
+              possibleUser.username,
+              possibleUser.password
+            );
+          }
         } catch { }
       }
     });
+    this.userService.user.subscribe(user => {
+      console.log(user);
+      
+      try{
+        if(!!this.loadingContPopup){
+          this.loadingContPopup.dismiss();  
+          console.log("idem dismissat loading controller");
+        }
+        }catch{ console.log("WTF"); }
+    })
 
+  }
+  ngOnDestroy (){
+    console.log("destroy login page");
+    
+    if(!!this.loadingContPopup)
+      this.loadingContPopup.dismiss();
   }
 
   changeMode(newMode: boolean) {
     this.mode = newMode;
   }
 
-  async login() {
-    this.userService.login(this.username_login, this.password_login);
+  async login(username?: string, password?: string) {
+    if(!!this.loadingContPopup){
+      this.loadingContPopup.dismiss();
+      console.log("also wtf");
+      
+    }
+    this.loadingContPopup = await this.loadingController.create({
+      message: 'Please wait...',
+    });
+    await this.loadingContPopup.present();
+    console.log("PRESENTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT");
+    
+    if(!!username && !!password){
+      console.log("storage login");
+      this.userService.login(username, password);
+    }
+    else{
+      console.log("normal login");
+      this.userService.login(this.username_login, this.password_login);
+
+    }
   }
 
   async insertImage() {

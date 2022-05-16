@@ -45,7 +45,8 @@ export class LobbyService {
   }
 
   async leaveLobby(){
-    let lobbyUUID = this.databaseService.myLobby.value.lobbyUUID;
+    let lobbyUUID = this.databaseService.myLobby.value?.lobbyUUID;
+    if(!this.myLobby) return;
     if(this.databaseService.myLobby.value.players.length === 1){
       //ja sam zadnji igrac da ode
       this.databaseService.removeLobby(lobbyUUID);

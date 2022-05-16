@@ -53,8 +53,10 @@ export class AccountSettingsPage implements OnInit {
 
   async deleteAccount(){
     await this.lobbyService.leaveLobby();
+    if(!!this.userService.user.value)
     await this.databaseService.deleteUser(this.userService.user.value);
-    await this.fireStorageService.deleteImage(this.userService.user.value.userImageLink);
+    if(!!this.userService.user.value?.userImageLink)
+    await this.fireStorageService.deleteImage(this.userService.user.value?.userImageLink);
     await this.userService.logout();
   }
 

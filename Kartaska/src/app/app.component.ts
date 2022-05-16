@@ -1,7 +1,6 @@
 import { ChangeDetectorRef, Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { LoadingController, MenuController, Platform } from '@ionic/angular';
-import { loadingController } from '@ionic/core';
+import { MenuController, Platform } from '@ionic/angular';
 import { User } from './interfaces/user';
 import { DatabaseService } from './services/database/database.service';
 import { LobbyService } from './services/lobby/lobby.service';

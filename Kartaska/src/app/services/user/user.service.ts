@@ -14,6 +14,7 @@ export class UserService {
   user: BehaviorSubject<User> = new BehaviorSubject<User>(null);
   loginDataStorageKey: string = 'CardGame_loginData';
   loginRequestUUID: string;
+  loginReqFailedVar: boolean;
 
   constructor(
     private dbService: DatabaseService,
@@ -24,6 +25,7 @@ export class UserService {
     this.uselessService.loginReqFailed.subscribe(rez => {
       if(rez === true){
         this.loginReqFailed();
+        this.loginReqFailedVar = true;
       }
     })
     this.loginRequestUUID = uuidv4();
@@ -57,33 +59,40 @@ export class UserService {
       );
       if (find) {
         console.log("nasao korisnika sa tim credsima");
-        
-        this.user.next(find); //ide prije?
 
         //double login provjera
         let haveToWait: boolean = false;
-        if(await this.dbService.LoginReqsExist(this.user.value.userUUID)){
+        if(await this.dbService.LoginReqsExist(find.userUUID)){
           haveToWait = true;
           console.log("moram cekat");
         }
         else console.log("ne moram cekati");
         
         
-        this.dbService.createRefrenceToMyUserLoginRequests(this.user.value.userUUID);
+        this.dbService.createRefrenceToMyUserLoginRequests(find);
         await this.dbService.makeLoginRequest(find.userUUID, this.loginRequestUUID);
         if(haveToWait === true){
           setTimeout(() =>{
-            if(!!this.user.value){ 
+            if(this.loginReqFailedVar){ 
+              this.loginReqFailedVar = false;
               this.storageService.setData(this.loginDataStorageKey, JSON.stringify(find));
-              this.dbService.checkMyUserLoginRequestsManually(this.user.value.userUUID);
+              this.dbService.checkMyUserLoginRequestsManually(find.userUUID);
               this.router.navigate(['mainApp/home']);
               this.dbService.canRemoveLoginRequests = true;
-              return true;
+              this.logout();
+              return false;
             }
-            return false;
+            else{       
+              this.storageService.setData(this.loginDataStorageKey, JSON.stringify(find));
+              this.dbService.canRemoveLoginRequests = true;
+              this.user.next(find);
+              this.router.navigate(['mainApp/home']);   
+            }
+            return true;
           }, 2000);
         }
         else{
+          this.user.next(find);
           this.storageService.setData(this.loginDataStorageKey, JSON.stringify(find));
           this.dbService.checkMyUserLoginRequestsManually(this.user.value.userUUID); // ovo ne treba
           this.router.navigate(['mainApp/home']);
@@ -99,8 +108,8 @@ export class UserService {
   async logout() {
     await this.storageService.removeData(this.loginDataStorageKey);
     this.dbService.canRemoveLoginRequests = false;
-    this.dbService.removeRefrenceToMyUserLoginRequests();
-    this.dbService.removeMyLoginRequest(this.user.value.userUUID);
+    await this.dbService.removeRefrenceToMyUserLoginRequests();
+    await this.dbService.removeMyLoginRequest(this.user.value.userUUID);
     this.user.next(null);
     this.router.navigate(["log-reg"]);
   }
@@ -109,7 +118,7 @@ export class UserService {
     console.log("loq req failed userService");
     await this.storageService.removeData(this.loginDataStorageKey);
     this.dbService.canRemoveLoginRequests = false;
-    this.dbService.removeRefrenceToMyUserLoginRequests();
+    await this.dbService.removeRefrenceToMyUserLoginRequests();
     this.user.next(null);
     this.router.navigate(["log-reg"]);
   }

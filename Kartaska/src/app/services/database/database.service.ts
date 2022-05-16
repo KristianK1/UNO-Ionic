@@ -324,29 +324,29 @@ export class DatabaseService {
       this.refToMyLoginRequests = onValue(ref(this.database, "loginRequests/"+user.userUUID), async (snapshot) => {
         const loginReqData = (snapshot.val());
 
-        if(loginReqData){
-          console.log("New log req data");
-          let keys = Object.keys(loginReqData);
-          let haveBeenKicked = true;
-          for (let i: number = 0; i < keys.length; i++) {
-            //let temp: boolean = loginReqData[keys[i]];
-            console.log("login REQ br " + i + " " + keys[i]);
-            if(keys[i] === this.myLoginRequestUUID) haveBeenKicked = false;
-            else{
-              if(this.canRemoveLoginRequests === true){
-                console.log("uklanjam request " + keys[i]);
-                await set(ref(this.database, "loginRequests/"+user.userUUID+"/" + keys[i]), null);
-              }
+        if(!loginReqData){
+          this.uselessService.loginReqFailed.next(true);
+          console.log("kickan sam");
+        }
+        console.log("New log req data");
+        let keys = Object.keys(loginReqData);
+        let haveBeenKicked = true;
+        for (let i: number = 0; i < keys.length; i++) {
+          //let temp: boolean = loginReqData[keys[i]];
+          console.log("login REQ br " + i + " " + keys[i]);
+          if(keys[i] === this.myLoginRequestUUID) haveBeenKicked = false;
+          else{
+            if(this.canRemoveLoginRequests === true){
+              console.log("uklanjam request " + keys[i]);
+              await set(ref(this.database, "loginRequests/"+user.userUUID+"/" + keys[i]), null);
             }
           }
-
-          if(haveBeenKicked === true) {
-            this.uselessService.loginReqFailed.next(true);
-            console.log("kickan sam");
-          }      
-          
         }
-        
+
+        if(haveBeenKicked === true) {
+          this.uselessService.loginReqFailed.next(true);
+          console.log("kickan sam");
+        }
       },
       {
         onlyOnce: false

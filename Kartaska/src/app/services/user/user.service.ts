@@ -109,7 +109,9 @@ export class UserService {
     await this.storageService.removeData(this.loginDataStorageKey);
     this.dbService.canRemoveLoginRequests = false;
     await this.dbService.removeRefrenceToMyUserLoginRequests();
-    await this.dbService.removeMyLoginRequest(this.user.value.userUUID);
+    try{
+      await this.dbService.removeMyLoginRequest(this.user.value.userUUID);
+    } catch{}
     this.user.next(null);
     this.router.navigate(["log-reg"]);
   }

@@ -7,6 +7,7 @@ import { StorageService } from 'src/app/services/storage/storage.service';
 import { UserService } from 'src/app/services/user/user.service';
 import { v4 as uuidv4 } from 'uuid';
 import { LoadingController } from '@ionic/angular';
+import { loadingController } from '@ionic/core';
 
 @Component({
   selector: 'app-log-reg',
@@ -34,6 +35,12 @@ export class LogRegPage implements OnInit, OnDestroy {
   ) { }
 
   async ngOnInit() {
+    
+    let initLoad = await this.loadingController.create({
+      message: 'Please wait...',
+    });
+    initLoad.present();
+    
     this.databaseService.allUsers.subscribe(async (rez) => {
       if (!!rez) {
         try {
@@ -54,15 +61,20 @@ export class LogRegPage implements OnInit, OnDestroy {
     });
     this.userService.user.subscribe(user => {
       console.log(user);
-      
-      try{
-        if(!!this.loadingContPopup){
-          this.loadingContPopup.dismiss();  
-          console.log("idem dismissat loading controller");
-        }
+      setTimeout(() => {
+        try{
+          if(!!this.loadingContPopup){
+            this.loadingContPopup.dismiss();  
+            console.log("idem dismissat loading controller");
+          }
         }catch{ console.log("WTF"); }
+      }, 2000);
     })
 
+    setTimeout(() => {
+      initLoad.dismiss();
+    }, 5000);
+    
   }
   ngOnDestroy (){
     console.log("destroy login page");

@@ -303,6 +303,8 @@ export class DbService {
     for (let i = 0; i < 108; i++) {
       newGame.cardOrder.push(i);
     }
+    newGame.cardOrder = this.cardService.randOrder(newGame.cardOrder);
+    
     newGame.playerCards = [];
     for (let i = 0; i < this.myLobby.value.players.length; i++) {
       let hand: Hand = <Hand>{};

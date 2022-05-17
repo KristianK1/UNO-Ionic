@@ -61,10 +61,14 @@ export class CardService {
     }
     return sum;
   }
-  randOrder(max: number){
-    //vrati polje numbera koji sadrže sve brojeve od 0 do max-1 u nasumicnom poredku
-    
+
+  randOrder(polje: number[]): number[]{
+    let poljeC: number[] = JSON.parse(JSON.stringify(polje));
+    poljeC = poljeC.sort((a,b) => (this.betterRand() > this.betterRand())? 1:-1 );
+    return poljeC;
   }
+
+
   numToCard(num: number): Card {
     let card: Card = <Card>{};
     if (num >= 104) {

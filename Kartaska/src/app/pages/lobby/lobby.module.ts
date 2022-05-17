@@ -17,4 +17,4 @@ import { LobbyPage } from './lobby.page';
   ],
   declarations: [LobbyPage]
 })
-export class LobbyPageModule {}
+export class LobbyPageModule { }

@@ -13,15 +13,15 @@ const routes: Routes = [
       },
       {
         path: 'lobby',
-        loadChildren: () => import('./pages/lobby/lobby.module').then( m => m.LobbyPageModule)
+        loadChildren: () => import('./pages/lobby/lobby.module').then(m => m.LobbyPageModule)
       },
       {
         path: 'account-settings',
-        loadChildren: () => import('./pages/account-settings/account-settings.module').then( m => m.AccountSettingsPageModule)
+        loadChildren: () => import('./pages/account-settings/account-settings.module').then(m => m.AccountSettingsPageModule)
       },
       {
         path: 'open-lobby',
-        loadChildren: () => import('./pages/open-lobby/open-lobby.module').then( m => m.OpenLobbyPageModule)
+        loadChildren: () => import('./pages/open-lobby/open-lobby.module').then(m => m.OpenLobbyPageModule)
       },
     ],
     canActivate: [AuthGuard],
@@ -36,7 +36,7 @@ const routes: Routes = [
     loadChildren: () =>
       import('./pages/log-reg/log-reg.module').then((m) => m.LogRegPageModule),
   },
- 
+
 
 ];
 
@@ -46,4 +46,4 @@ const routes: Routes = [
   ],
   exports: [RouterModule],
 })
-export class AppRoutingModule {}
+export class AppRoutingModule { }

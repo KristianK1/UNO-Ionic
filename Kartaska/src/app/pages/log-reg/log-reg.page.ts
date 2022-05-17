@@ -36,19 +36,19 @@ export class LogRegPage implements OnInit, OnDestroy {
   ) { }
 
   async ngOnInit() {
-    
+
     let initLoad = await this.loadingController.create({
       message: 'Please wait...',
     });
     initLoad.present();
-    
+
     this.databaseService.allUsers.subscribe(async (rez) => {
       if (!!rez) {
         try {
           console.log('hello');
 
           let data: string = await this.storageService.getData(this.userService.loginDataStorageKey);
-          if(!!data){
+          if (!!data) {
             let possibleUser: User = JSON.parse(data);
             console.log(possibleUser);
 
@@ -77,12 +77,12 @@ export class LogRegPage implements OnInit, OnDestroy {
     setTimeout(() => {
       initLoad.dismiss();
     }, 500);
-    
+
   }
-  ngOnDestroy (){
+  ngOnDestroy() {
     console.log("destroy login page");
-    
-    if(!!this.loadingContPopup)
+
+    if (!!this.loadingContPopup)
       this.loadingContPopup.dismiss();
   }
 
@@ -91,7 +91,7 @@ export class LogRegPage implements OnInit, OnDestroy {
   }
 
   async login(username?: string, password?: string) {
-    if(!!this.loadingContPopup){
+    if (!!this.loadingContPopup) {
       this.loadingContPopup.dismiss();
       console.log("also wtf");
     }
@@ -102,14 +102,14 @@ export class LogRegPage implements OnInit, OnDestroy {
     console.log("PRESENTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT");
 
     //pocinje proces logiranja
-    let loggedIn = await this.userService.login(username || this.username_login, password ||this.password_login);
+    let loggedIn = await this.userService.login(username || this.username_login, password || this.password_login);
     console.log("loggedIn = " + loggedIn);
-    if(loggedIn){
+    if (loggedIn) {
       this.router.navigate(["mainApp/home"]);
-    } 
+    }
     //zavrsava proces logiranja
     console.log("dismisssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss");
-    
+
     this.loadingContPopup.dismiss();
   }
 

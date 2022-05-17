@@ -9,7 +9,7 @@ describe('AccountSettingsPage', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ AccountSettingsPage ],
+      declarations: [AccountSettingsPage],
       imports: [IonicModule.forRoot()]
     }).compileComponents();
 

@@ -21,17 +21,17 @@ export class UserService {
     private storageService: StorageService,
   ) {
     this.dbService.loginReqFailed.subscribe(rez => {
-      if(rez === true){
+      if (rez === true) {
         this.loginReqFailed();
         this.loginReqFailedVar = true;
       }
     });
-    
+
     this.loginRequestUUID = uuidv4();
     dbService.allUsers.subscribe(allUsers => {
-      if(!!this.user.value){
-        let myself = allUsers.find( o => 
-          o.username === this.user.value.username && 
+      if (!!this.user.value) {
+        let myself = allUsers.find(o =>
+          o.username === this.user.value.username &&
           o.password === this.user.value.password &&
           o.userUUID === this.user.value.userUUID
         );
@@ -39,7 +39,7 @@ export class UserService {
         console.log(this.user.value);
         console.log("ovo sam ja");
         console.log(myself);
-        if(!myself){
+        if (!myself) {
           //this.logout();
         }
       }
@@ -50,8 +50,8 @@ export class UserService {
     console.log("idem se logirat");
     console.log("svi korisnici");
     console.log(this.dbService.allUsers.value);
-    
-    
+
+
     if (!this.user.value) {
       let find: User = this.dbService.allUsers.value.find(
         (o) => o.username === name && o.password === pass
@@ -62,8 +62,8 @@ export class UserService {
       }
 
       let reqsToMyUser = await this.dbService.checkMyUserLoginRequestsManually(find.userUUID);
-      
-      if(reqsToMyUser.length === 0 ){
+
+      if (reqsToMyUser.length === 0) {
         console.log("ne moram cekati");
         this.user.next(find);
         await this.storageService.setData(this.loginDataStorageKey, JSON.stringify(find));
@@ -71,34 +71,34 @@ export class UserService {
         await this.dbService.createRefrenceToMyUserLoginRequests(find);
         return true;
       }
-      
+
       await this.dbService.makeLoginRequest(find.userUUID, this.loginRequestUUID);
 
-      for(let i = 0; i<5; i++){
+      for (let i = 0; i < 5; i++) {
         console.log("for " + i);
         let failedLogin = false;
-        setTimeout( async () =>{
+        setTimeout(async () => {
           console.log("for nakon timeouta " + i);
-          
+
           let reqs: string[] = await this.dbService.checkMyUserLoginRequestsManually(find.userUUID);
-          let myReq: string = reqs.find( o => o === this.dbService.myLoginRequestUUID);
-          if(!!myReq){
+          let myReq: string = reqs.find(o => o === this.dbService.myLoginRequestUUID);
+          if (!!myReq) {
             //nisam kickan još
           }
-          else{
+          else {
             failedLogin = true;
           }
 
         }, 400);
         await this.timeout(600);
-        
-        if(JSON.parse(JSON.stringify(failedLogin)) === true){
+
+        if (JSON.parse(JSON.stringify(failedLogin)) === true) {
           return true;
         }
       }
 
       console.log("ovdje sam");
-      
+
 
 
       this.storageService.setData(this.loginDataStorageKey, JSON.stringify(find));
@@ -114,14 +114,14 @@ export class UserService {
   async logout() {
     await this.storageService.removeData(this.loginDataStorageKey);
     await this.dbService.removeRefrenceToMyUserLoginRequests();
-    try{
+    try {
       await this.dbService.removeMyLoginRequest(this.user.value.userUUID);
-    } catch{}
+    } catch { }
     this.user.next(null);
     this.router.navigate(["log-reg"]);
   }
 
-  async loginReqFailed(){
+  async loginReqFailed() {
     console.log("loq req failed userService");
     await this.storageService.removeData(this.loginDataStorageKey);
     await this.dbService.removeRefrenceToMyUserLoginRequests();
@@ -129,7 +129,7 @@ export class UserService {
     this.router.navigate(["log-reg"]);
   }
 
-  
+
   async timeout(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }

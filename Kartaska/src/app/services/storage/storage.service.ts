@@ -9,7 +9,7 @@ export class StorageService {
 
   constructor() { }
 
-  async getData(storageKey: string) : Promise<string> {
+  async getData(storageKey: string): Promise<string> {
     return await JSON.parse((await Storage.get({ key: storageKey })).value);;
   }
 

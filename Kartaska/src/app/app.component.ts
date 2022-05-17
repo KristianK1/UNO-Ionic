@@ -12,7 +12,7 @@ import { UserService } from './services/user/user.service';
   styleUrls: ['app.component.scss'],
 })
 export class AppComponent {
-  
+
   showMenu: boolean;
   showNewLobby: boolean;
   isMobile: boolean;
@@ -20,7 +20,7 @@ export class AppComponent {
 
   user: User;
   img: string;
-  
+
   allowHomePage: boolean = true;
 
   constructor(
@@ -31,35 +31,35 @@ export class AppComponent {
     private databaseService: DbService,
     private router: Router,
     private lobbyService: LobbyService,
-    ) {
-      this.appInit();
+  ) {
+    this.appInit();
 
-      this.databaseService.myLobby.subscribe(rez => {
-        //TODO mozda napravit boolean myLobbyExists da se ovo ne trigera stalno
-          console.log("app comp bool change");
-          console.log(rez);
-          
-          
-          this.allowHomePage = !rez;
-          console.log(this.allowHomePage);
-          
-      })
-    }
+    this.databaseService.myLobby.subscribe(rez => {
+      //TODO mozda napravit boolean myLobbyExists da se ovo ne trigera stalno
+      console.log("app comp bool change");
+      console.log(rez);
+
+
+      this.allowHomePage = !rez;
+      console.log(this.allowHomePage);
+
+    })
+  }
 
 
   async appInit() {
     console.log("app init");
     await this.platform.ready();
-    
-    this.platform.resize.subscribe( x => {
+
+    this.platform.resize.subscribe(x => {
       let width: number = this.platform.width();
       console.log("širina platforme je " + width);
-      
-      if(width < 1000){
+
+      if (width < 1000) {
         this.showMenu = false;
         this.closeMenu();
       }
-      else{
+      else {
         this.showMenu = true;
         this.openMenu();
       }
@@ -68,7 +68,7 @@ export class AppComponent {
     this.userService.user.subscribe(user => {
       console.log("user update");
       console.log(user);
-      
+
       this.user = user;
       this.logiran = !!user;
       console.log("here");
@@ -76,34 +76,34 @@ export class AppComponent {
     })
 
     this.isMobile = this.platform.is('mobileweb') || this.platform.is('mobile');
-    
+
     let width: number = this.platform.width();
-    
-    if(width < 1000){
+
+    if (width < 1000) {
       this.showMenu = false;
       this.closeMenu();
     }
-    else{
+    else {
       this.showMenu = true;
       this.openMenu();
     }
-  
+
   }
 
-  logout(){
+  logout() {
     this.closeMenu();
     this.userService.logout();
   }
 
-  openMenu(){
+  openMenu() {
     this.menuCtrl.open(); //TODO platform - size of screen za pocetno (moze se updetad kad god) stanje menu-a
   }
-  
-  closeMenu(){
+
+  closeMenu() {
     this.menuCtrl.close();
   }
 
-  async leaveLobby(){
+  async leaveLobby() {
     this.lobbyService.leaveLobby();
   }
 }

@@ -9,7 +9,7 @@ describe('LobbyPage', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ LobbyPage ],
+      declarations: [LobbyPage],
       imports: [IonicModule.forRoot()]
     }).compileComponents();
 

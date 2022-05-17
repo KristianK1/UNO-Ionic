@@ -5,7 +5,7 @@ import { User } from 'src/app/interfaces/user';
 import { DbService } from 'src/app/services/db/db.service';
 import { LobbyService } from 'src/app/services/lobby/lobby.service';
 import { UserService } from 'src/app/services/user/user.service';
-import { v4 as uuidv4} from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 @Component({
   selector: 'app-open-lobby',
@@ -24,10 +24,10 @@ export class OpenLobbyPage implements OnInit {
   ) { }
 
   ngOnInit() {
-    
+
   }
 
-  async makeLobby(){
+  async makeLobby() {
     let newLobby: Lobby = <Lobby>{};
     newLobby.lobbyUUID = uuidv4();
     newLobby.lobbyName = this.lobbyName;
@@ -45,19 +45,19 @@ export class OpenLobbyPage implements OnInit {
     await this.dbService.getAllLobbysManually(true);
 
     let copyLobby = this.dbService.allLobbys.value.find(o => o.lobbyName === newLobby.lobbyName);
-    
-    if(!!copyLobby){
+
+    if (!!copyLobby) {
       console.log("Postoji lobby sa istim imenom!");
       alert("Postoji lobby sa istim imenom!")
-      return; 
+      return;
     }
 
     await this.dbService.insertNewLobby(newLobby);
-    
+
     this.lobbyName = "";
     this.lobbyPassword = "";
     console.log("navigiraj na lobby");
-    
+
     this.router.navigate(['mainApp/lobby']);
   }
 

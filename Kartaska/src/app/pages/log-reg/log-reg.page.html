@@ -2,11 +2,15 @@
   <div style="width: 30%; min-width: 200px; margin:auto;">
     <div style="margin: 20px 0px 20px 0px;">
       <ion-img src="assets\images\UNO_Logo.svg.png"></ion-img>
-      <div *ngIf="mode==true">  
-        <ion-label><h1 class="logRegLabel">Login</h1></ion-label>  
+      <div *ngIf="mode==true">
+        <ion-label>
+          <h1 class="logRegLabel">Login</h1>
+        </ion-label>
       </div>
-      <div *ngIf="mode==false">  
-        <ion-label><h1 class="logRegLabel">Register</h1></ion-label>  
+      <div *ngIf="mode==false">
+        <ion-label>
+          <h1 class="logRegLabel">Register</h1>
+        </ion-label>
       </div>
     </div>
 
@@ -20,9 +24,9 @@
       <ion-input type="password" [(ngModel)]="password_login"></ion-input>
     </ion-item>
 
-    <ion-button *ngIf="mode==false" class = "imgInsertBt" (click)="insertImage()">Insert profile image</ion-button>
+    <ion-button *ngIf="mode==false" class="imgInsertBt" (click)="insertImage()">Insert profile image</ion-button>
     <ion-img *ngIf="mode==false && tempImg?.length> 5000" [src]="tempImgPrefix"></ion-img>
-    
+
     <div *ngIf="mode==true">
       <ion-button (click)="login()" class="logRegBt">
         Login
@@ -35,8 +39,10 @@
       </ion-button>
     </div>
 
-    <ion-button *ngIf="mode==true" (click)="changeMode(false)" fill="clear" class="changeModeBt">Register instead</ion-button>
-    <ion-button *ngIf="mode==false" (click)="changeMode(true)" fill="clear" class="changeModeBt">Login instead</ion-button>
-    
+    <ion-button *ngIf="mode==true" (click)="changeMode(false)" fill="clear" class="changeModeBt">Register instead
+    </ion-button>
+    <ion-button *ngIf="mode==false" (click)="changeMode(true)" fill="clear" class="changeModeBt">Login instead
+    </ion-button>
+
   </div>
 </ion-content>

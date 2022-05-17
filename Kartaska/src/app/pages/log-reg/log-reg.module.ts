@@ -17,4 +17,4 @@ import { LogRegPage } from './log-reg.page';
   ],
   declarations: [LogRegPage]
 })
-export class LogRegPageModule {}
+export class LogRegPageModule { }

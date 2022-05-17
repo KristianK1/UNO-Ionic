@@ -34,16 +34,16 @@ export class AccountSettingsPage implements OnInit {
       console.log("acc setting user update");
       this.changeDetector.detectChanges();
     })
-    
+
   }
 
 
-  async changePicture(){
+  async changePicture() {
     let img = await this.cameraService.takePhoto();
-    try{
+    try {
       await this.fireStorageService.deleteImage(this.userService.user.value.userUUID);
     }
-    catch(e){
+    catch (e) {
       console.log(e);
     }
     let newLink = await this.fireStorageService.uploadImage(this.userService.user.value.userUUID, img);
@@ -51,12 +51,12 @@ export class AccountSettingsPage implements OnInit {
 
   }
 
-  async deleteAccount(){
+  async deleteAccount() {
     await this.lobbyService.leaveLobby();
-    if(!!this.userService.user.value)
-    await this.dbService.deleteUser(this.userService.user.value);
-    if(!!this.userService.user.value?.userImageLink)
-    await this.fireStorageService.deleteImage(this.userService.user.value?.userImageLink);
+    if (!!this.userService.user.value)
+      await this.dbService.deleteUser(this.userService.user.value);
+    if (!!this.userService.user.value?.userImageLink)
+      await this.fireStorageService.deleteImage(this.userService.user.value?.userImageLink);
     await this.userService.logout();
   }
 

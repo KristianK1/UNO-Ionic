@@ -17,8 +17,8 @@ export class LobbyService {
     private router: Router,
   ) {
     this.dbService.myLobby.subscribe(lobby => {
-      if(!lobby) {
-        this.myLobby = null; 
+      if (!lobby) {
+        this.myLobby = null;
         this.dbService.removeReferenceFromLobby();
         this.router.navigate(["mainApp/home"]);
         return;
@@ -27,7 +27,7 @@ export class LobbyService {
 
       let meInLobby = this.myLobby.players.find(o => o.userUUID === this.userService.user.value.userUUID);
 
-      if(!meInLobby){
+      if (!meInLobby) {
         this.dbService.removeReferenceFromLobby();
         this.router.navigate(["mainApp/home"]);
       }
@@ -35,35 +35,35 @@ export class LobbyService {
     });
   }
 
-  async joinLobby(lobbyUUID: string){
+  async joinLobby(lobbyUUID: string) {
     console.log("joined lobby " + lobbyUUID);
     let me: User = this.userService.user.value;
     me = JSON.parse(JSON.stringify(me));
-    me.password = null; 
+    me.password = null;
     await this.dbService.joinLobby(me, lobbyUUID);
     this.router.navigate(["mainApp/lobby"]);
   }
 
-  async leaveLobby(){
+  async leaveLobby() {
     let lobbyUUID = this.dbService.myLobby.value?.lobbyUUID;
-    if(!this.myLobby) return;
-    if(this.dbService.myLobby.value.players.length === 1){
+    if (!this.myLobby) return;
+    if (this.dbService.myLobby.value.players.length === 1) {
       //ja sam zadnji igrac da ode
       this.dbService.removeLobby(lobbyUUID);
     }
-    else if(this.dbService.myLobby.value.adminUUID === this.userService.user.value.userUUID){
+    else if (this.dbService.myLobby.value.adminUUID === this.userService.user.value.userUUID) {
       //ja sam admin
       this.dbService.alterLobbyAdmin(lobbyUUID, this.dbService.myLobby.value.players[1].userUUID);
     }
-    
+
     await this.dbService.removePlayerFromLobby(
-      this.dbService.myLobby.value.lobbyUUID, 
+      this.dbService.myLobby.value.lobbyUUID,
       this.userService.user.value.userUUID
     );
 
 
     this.dbService.myLobby.next(null);
-    
+
     this.router.navigate(["mainApp/home"]);
   }
 

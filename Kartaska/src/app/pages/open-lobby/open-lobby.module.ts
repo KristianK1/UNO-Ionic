@@ -17,4 +17,4 @@ import { OpenLobbyPage } from './open-lobby.page';
   ],
   declarations: [OpenLobbyPage]
 })
-export class OpenLobbyPageModule {}
+export class OpenLobbyPageModule { }

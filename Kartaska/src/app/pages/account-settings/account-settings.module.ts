@@ -17,4 +17,4 @@ import { AccountSettingsPage } from './account-settings.page';
   ],
   declarations: [AccountSettingsPage]
 })
-export class AccountSettingsPageModule {}
+export class AccountSettingsPageModule { }

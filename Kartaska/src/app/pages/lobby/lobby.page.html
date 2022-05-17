@@ -1,24 +1,25 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>Lobby</ion-title>
+    <ion-title>{{myLobby?.lobbyName}}</ion-title>
   </ion-toolbar>
 </ion-header>
-  
+
 <ion-content>
   <ion-grid>
     <ion-row>
       <ion-col *ngFor="let player of myLobby?.players" sizeLg="3" sizeMd="4" sizeSm="6">
-        <ion-item  style="margin: 5px">
-          
+        <ion-item style="margin: 5px">
+
           <ion-fab-button>
-            <ion-img [src] ="player.userImageLink"></ion-img>
+            <ion-img [src]="player.userImageLink"></ion-img>
           </ion-fab-button>
 
           <ion-label style="margin-left: 15px;">
             {{player.username}}
           </ion-label>
-          
-          <ion-button *ngIf="isAdmin" (click)="kickPlayer(player.userUUID)" [disabled]="me.userUUID === player.userUUID">
+
+          <ion-button *ngIf="isAdmin" (click)="kickPlayer(player.userUUID)"
+            [disabled]="me.userUUID === player.userUUID">
             Kick
           </ion-button>
         </ion-item>

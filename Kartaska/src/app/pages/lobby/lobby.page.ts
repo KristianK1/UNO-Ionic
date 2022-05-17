@@ -19,35 +19,32 @@ export class LobbyPage implements OnInit {
   newMessage: string;
 
   constructor(
-    private databaseService: DbService,
+    private dbService: DbService,
     private userService: UserService,
   ) { }
 
   ngOnInit() {
 
-    this.userService.user.subscribe( rez => {
+    this.userService.user.subscribe(rez => {
       this.me = rez;
     });
 
-    this.databaseService.myLobby.subscribe(rez => {
-      console.log(rez);
-      
-      
+    this.dbService.myLobby.subscribe(rez => {
       this.myLobby = rez;
-      if(!this.myLobby) return;
-      console.log("ovo je moj lobby");
+      console.log("yo wtf");
       console.log(this.myLobby);
-      
-      if(this.myLobby.adminUUID === this.userService.user.value.userUUID){
-        this.isAdmin = true;
-      }
-      else{
-        this.isAdmin = false;
+
+      if (!!this.myLobby) {
+        console.log("ovo je moj lobby");
+        console.log(this.myLobby);
+
+        this.isAdmin = this.myLobby.adminUUID === this.userService.user.value.userUUID;
+
       }
     });
   }
 
-  onEnter(){
+  onEnter() {
     /*console.log(this.newMessage);
     let message: Message = <Message>{};
     message.text = this.newMessage;
@@ -57,11 +54,11 @@ export class LobbyPage implements OnInit {
     this.newMessage = "";
   }
 
-  async kickPlayer(userUUID: string){
-    this.databaseService.removePlayerFromLobby(this.myLobby.lobbyUUID, userUUID);
+  async kickPlayer(userUUID: string) {
+    this.dbService.removePlayerFromLobby(this.myLobby.lobbyUUID, userUUID);
   }
 
-  async startGame(){
-    await this.databaseService.createGame(this.databaseService.myLobby.value.lobbyUUID);
+  async startGame() {
+    await this.dbService.createGame(this.dbService.myLobby.value.lobbyUUID);
   }
 }

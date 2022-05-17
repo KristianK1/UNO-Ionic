@@ -17,8 +17,8 @@ export class DbService {
 
   allUsers: BehaviorSubject<Array<User>> = new BehaviorSubject<Array<User>>([]);
   allLobbys: BehaviorSubject<Array<Lobby>> = new BehaviorSubject<Array<Lobby>>([]);
-  myLobby:  BehaviorSubject<Lobby> = new BehaviorSubject<Lobby>(null);
-  
+  myLobby: BehaviorSubject<Lobby> = new BehaviorSubject<Lobby>(null);
+
   loginReqFailed: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
   dbConnection: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
@@ -29,7 +29,7 @@ export class DbService {
   refToMyLobby: Unsubscribe;
   refToMyLoginRequests: Unsubscribe;
   myLoginRequestUUID: string = uuidv4();
-  
+
   constructor() {
     this.app = initializeApp(environment.firebaseConfig);
     this.database = getDatabase();
@@ -38,10 +38,10 @@ export class DbService {
 
 
   async registerUser(user: User): Promise<boolean> {
-    for (let i = 0; i<this.allUsers?.value?.length; i++){
+    for (let i = 0; i < this.allUsers?.value?.length; i++) {
       console.log("tt" + i);
-      
-      if(this.allUsers.value[i].username === user.username){
+
+      if (this.allUsers.value[i].username === user.username) {
         console.log("Vec postoji");
         return false;
       }
@@ -50,31 +50,31 @@ export class DbService {
     return true;
   }
 
-  async deleteUser(user: User){
+  async deleteUser(user: User) {
     await set(ref(this.database, "users/" + user.userUUID), null);
-    for(let lobby of this.allLobbys.value){
+    for (let lobby of this.allLobbys.value) {
       let n1 = lobby.players.length;
       let pCopy = JSON.parse(JSON.stringify(lobby.players));
-      pCopy = pCopy.filter( o => o.userUUID != user.userUUID);
-      if(n1 === 1){
+      pCopy = pCopy.filter(o => o.userUUID != user.userUUID);
+      if (n1 === 1) {
         set(ref(this.database, "lobbys/" + lobby.lobbyUUID), null);
       }
-      else if(n1 != pCopy.length){
+      else if (n1 != pCopy.length) {
         set(ref(this.database, "lobbys/" + lobby.lobbyUUID + "/players"), pCopy);
       }
-      
+
     }
   }
 
 
-  async removeLobby(lobbyUUID: string){
+  async removeLobby(lobbyUUID: string) {
     await set(ref(this.database, "lobbys/" + lobbyUUID), null);
   }
 
 
-  async insertNewLobby(lobby: Lobby){
-    for (let i = 0; i<this.allLobbys?.value?.length; i++){
-      if(this.allLobbys.value[i].lobbyName === lobby.lobbyName){
+  async insertNewLobby(lobby: Lobby) {
+    for (let i = 0; i < this.allLobbys?.value?.length; i++) {
+      if (this.allLobbys.value[i].lobbyName === lobby.lobbyName) {
         console.log("Vec postoji lobby s tim imenom");
         return false;
       }
@@ -84,13 +84,13 @@ export class DbService {
     return true;
   }
 
-  async joinLobby(user: User, lobbyUUID: string){
+  async joinLobby(user: User, lobbyUUID: string) {
     user.password = null;
     let allLobbys = this.allLobbys.value;
-    for(let i = 0; i<allLobbys.length; i++){
-      if(allLobbys[i].lobbyUUID === lobbyUUID){
+    for (let i = 0; i < allLobbys.length; i++) {
+      if (allLobbys[i].lobbyUUID === lobbyUUID) {
         let findPlayer: User = allLobbys[i].players.find(o => o.userUUID === user.userUUID);
-        if(!findPlayer){
+        if (!findPlayer) {
           allLobbys[i].players.push(user);
           this.myLobby.next(JSON.parse(JSON.stringify(allLobbys[i])));
           await set(ref(this.database, 'lobbys/' + lobbyUUID + "/players"), allLobbys[i].players);
@@ -103,10 +103,10 @@ export class DbService {
   }
 
   createReferenceToAllUsers() {
-    if(!!this.refToAllUsers) {
+    if (!!this.refToAllUsers) {
       this.refToAllUsers();
       console.log("duplic this.refToAllUsers");
-      
+
     }
     this.refToAllUsers = onValue(ref(this.database, 'users'), (snapshot) => {
       const DataBase_Users_data = (snapshot.val());
@@ -136,9 +136,9 @@ export class DbService {
     );
   }
 
-  createReferenceToAllLobbys(){
+  createReferenceToAllLobbys() {
     console.log("idem creatat ref na SVE lobbye");
-    if(!!this.refToLobbys){
+    if (!!this.refToLobbys) {
       this.refToLobbys();
       console.log("duplic this.refToLobbys");
     }
@@ -149,72 +149,74 @@ export class DbService {
       console.log(DataBase_Lobbys_data);
       if (!DataBase_Lobbys_data) this.allLobbys.next([]);
       else
-      try {
-        let allLobbys: Lobby[] = [];
-        let keys = Object.keys(DataBase_Lobbys_data);
+        try {
+          let allLobbys: Lobby[] = [];
+          let keys = Object.keys(DataBase_Lobbys_data);
 
-        for (let i: number = 0; i < keys.length; i++) {
-          let temp: Lobby = DataBase_Lobbys_data[keys[i]];
-          if(!temp.players) temp.players = [];
-          allLobbys.push(temp);
+          for (let i: number = 0; i < keys.length; i++) {
+            let temp: Lobby = DataBase_Lobbys_data[keys[i]];
+            if (!temp.players) temp.players = [];
+            allLobbys.push(temp);
+          }
+          console.log(allLobbys);
+          this.allLobbys.next(allLobbys);
+          this.dbConnection.next(true);
         }
-        console.log(allLobbys);
-        this.allLobbys.next(allLobbys);
-        this.dbConnection.next(true);
-      }
-      catch (error) {
-        console.log("GREŠKA PRI ČITANJU IZ BAZE");
-        this.allLobbys.next([]);
-        this.dbConnection.next(false); //TODO ????
-      }
+        catch (error) {
+          console.log("GREŠKA PRI ČITANJU IZ BAZE");
+          this.allLobbys.next([]);
+          this.dbConnection.next(false); //TODO ????
+        }
     },
-    {
-      onlyOnce: false
-    });
+      {
+        onlyOnce: false
+      });
   }
 
-  removeReferenceFromAllLobbys(){
+  removeReferenceFromAllLobbys() {
     console.log("idem DESTORAYAT ref na SVE lobbye");
-    if(!!this.refToLobbys) {
+    if (!!this.refToLobbys) {
       this.refToLobbys();
       this.refToLobbys = undefined;
     }
   }
 
 
-  createReferenceToLobby(UUID: string){
+  createReferenceToLobby(UUID: string) {
     console.log("stvaram referencu na moj lobby ", UUID);
-    if(!!this.refToMyLobby){
+    if (!!this.refToMyLobby) {
       this.refToMyLobby();
       console.log("duplic - single lobby");
-      
+
     }
-    this.refToMyLobby = onValue(ref(this.database, 'lobbys/'+ UUID), async (snapshot) => {
+    this.refToMyLobby = onValue(ref(this.database, 'lobbys/' + UUID), async (snapshot) => {
       const data: Lobby = (snapshot.val());
-      console.log("new data for my lobby");
+      console.log("new data for my lobby - dbservice");
       console.log(data);
-      
-      if(!data) this.myLobby.next(null);
-      else if(!data.players) {
-        data.players = [];
-        try{
+
+      if (!data) this.myLobby.next(null);
+      else {
+        if (!data.players) {
+          data.players = [];
+        }
+        try {
           this.myLobby.next(data);
         }
-        catch{
+        catch {
           console.log("single lobby update cast failed");
           this.myLobby.next(null);
         }
       }
     },
-    {
-      onlyOnce: false
-    }
+      {
+        onlyOnce: false
+      }
     );
   }
 
-  removeReferenceFromLobby(){
+  removeReferenceFromLobby() {
     console.log("idem DESTORAYAT ref na SVE lobbye");
-    if(!!this.refToMyLobby) {
+    if (!!this.refToMyLobby) {
       this.refToMyLobby();
       this.refToMyLobby = undefined;
     }
@@ -227,7 +229,7 @@ export class DbService {
     console.log("SVI LOBBYI - Novi podaci iz baze");
     console.log(DataBase_Lobbys_data);
     if (DataBase_Lobbys_data) {
-      if(pushToBehSub){
+      if (pushToBehSub) {
         //this.myLobby.next(null); TODO: sto s ovim
         this.allLobbys.next([]);
       }
@@ -243,18 +245,18 @@ export class DbService {
       }
       console.log(allLobbys);
       this.allLobbys.next(allLobbys);
-      if(pushToBehSub)
+      if (pushToBehSub)
         this.dbConnection.next(true);
       return allLobbys;
     }
-    catch{
+    catch {
       console.log("GREŠKA PRI ČITANJU IZ BAZE");
-      if(pushToBehSub)
+      if (pushToBehSub)
         this.allLobbys.next([]);
       this.dbConnection.next(false); //TODO ????
       return [];
     }
-    
+
   }
 
 
@@ -263,28 +265,28 @@ export class DbService {
     const DataBase_Lobby_data = (snapshot.val());
 
     if (!DataBase_Lobby_data) {
-      if(pushToBehSub) this.myLobby.next(null);
+      if (pushToBehSub) this.myLobby.next(null);
       return null;
     }
 
     try {
       let temp: Lobby = DataBase_Lobby_data;
-      if(pushToBehSub) this.myLobby.next(temp);
-      this.dbConnection.next(true); 
+      if (pushToBehSub) this.myLobby.next(temp);
+      this.dbConnection.next(true);
       return temp;
     }
-    catch{
+    catch {
       console.log("GREŠKA PRI ČITANJU IZ BAZE");
-      if(pushToBehSub) this.myLobby.next(null);
+      if (pushToBehSub) this.myLobby.next(null);
       this.dbConnection.next(false); //TODO ????
     }
     return null;
   }
 
-  async removePlayerFromLobby(lobbyUUID: string, userUUID: string){
+  async removePlayerFromLobby(lobbyUUID: string, userUUID: string) {
     let lobby = await this.getLobbyManually(lobbyUUID, true);
-    if(!lobby) return false;
-    let players = lobby.players.filter( o => o.userUUID !== userUUID);
+    if (!lobby) return false;
+    let players = lobby.players.filter(o => o.userUUID !== userUUID);
     await set(ref(this.database, "lobbys/" + lobbyUUID + "/players"), players);
     return true
   }
@@ -295,17 +297,17 @@ export class DbService {
     newGame.gameStat = <GameStat>{};
     newGame.moves = [];
     newGame.cardOrder = [];
-    for(let i = 0; i<108; i++){
+    for (let i = 0; i < 108; i++) {
       newGame.cardOrder.push(i);
     }
     newGame.playerCards = [];
-    for(let i = 0; i<this.myLobby.value.players.length; i++){
+    for (let i = 0; i < this.myLobby.value.players.length; i++) {
       let hand: Hand = <Hand>{};
       hand.userUUID = this.myLobby.value.players[i].userUUID;
-      
+
       let cards: number[] = [];
-      for(let j = 0; j<7; j++){
-        cards.push(newGame.cardOrder[7*i+j]);
+      for (let j = 0; j < 7; j++) {
+        cards.push(newGame.cardOrder[7 * i + j]);
       }
       hand.cards = cards;
       newGame.playerCards.push(hand)
@@ -315,99 +317,99 @@ export class DbService {
     await set(ref(this.database, "games/" + newGame.gameUUID), newGame);
   }
 
-  whichLobbyDoIBelong(playerUUID: string): string{
-    for(let lobby of this.allLobbys.value){
+  whichLobbyDoIBelong(playerUUID: string): string {
+    for (let lobby of this.allLobbys.value) {
       let findMe: User = lobby.players.find(o => o.userUUID === playerUUID);
-      if(!!findMe) return lobby.lobbyUUID;
+      if (!!findMe) return lobby.lobbyUUID;
     }
     return null;
   }
 
-  async alterLobbyAdmin(lobbyUUID: string, userUUID: string){
+  async alterLobbyAdmin(lobbyUUID: string, userUUID: string) {
     let lobby = await this.getLobbyManually(lobbyUUID, true);
-    if(!lobby) return false;
+    if (!lobby) return false;
 
     await set(ref(this.database, "lobbys/" + lobbyUUID + "/adminUUID"), userUUID);
   }
 
 
-  async makeLoginRequest(userUUID: string, requestUUID: string){    
+  async makeLoginRequest(userUUID: string, requestUUID: string) {
     await set(ref(this.database, "loginRequests/" + userUUID + "/" + this.myLoginRequestUUID), true);
   }
 
-  async removeMyLoginRequest(userUUID: string){
+  async removeMyLoginRequest(userUUID: string) {
     //reqUUID se nalazi u database servisu
-    await set(ref(this.database, "loginRequests/"+userUUID+"/" + this.myLoginRequestUUID), null);
+    await set(ref(this.database, "loginRequests/" + userUUID + "/" + this.myLoginRequestUUID), null);
   }
-  
-  async createRefrenceToMyUserLoginRequests(user: User){
-    if(!!this.refToMyLoginRequests) {
+
+  async createRefrenceToMyUserLoginRequests(user: User) {
+    if (!!this.refToMyLoginRequests) {
       this.refToMyLoginRequests();
       this.refToMyLoginRequests = undefined;
     }
-    try{
-      this.refToMyLoginRequests = 
-      onValue(ref(this.database, "loginRequests/"+user.userUUID), async (snapshot) => {
+    try {
+      this.refToMyLoginRequests =
+        onValue(ref(this.database, "loginRequests/" + user.userUUID), async (snapshot) => {
 
-        const loginReqData = (snapshot.val());
+          const loginReqData = (snapshot.val());
 
-        if(!loginReqData){
-          this.loginReqFailed.next(true);
-          console.log("kickan sam");
-        }
-        else{
-          console.log("New log req data");
-          let keys = Object.keys(loginReqData);
-          let haveBeenKicked = true;
-          for (let i: number = 0; i < keys.length; i++) {
-            //let temp: boolean = loginReqData[keys[i]];
-            console.log("login REQ br " + i + " " + keys[i]);
-            if(keys[i] === this.myLoginRequestUUID) haveBeenKicked = false;
-            else{
-              console.log("uklanjam request " + keys[i]);
-              await set(ref(this.database, "loginRequests/"+user.userUUID+"/" + keys[i]), null);
-            }
-          }
-
-          if(haveBeenKicked === true) {
+          if (!loginReqData) {
             this.loginReqFailed.next(true);
             console.log("kickan sam");
           }
-        }
-      },
-      {
-        onlyOnce: false
-      }
-      );
+          else {
+            console.log("New log req data");
+            let keys = Object.keys(loginReqData);
+            let haveBeenKicked = true;
+            for (let i: number = 0; i < keys.length; i++) {
+              //let temp: boolean = loginReqData[keys[i]];
+              console.log("login REQ br " + i + " " + keys[i]);
+              if (keys[i] === this.myLoginRequestUUID) haveBeenKicked = false;
+              else {
+                console.log("uklanjam request " + keys[i]);
+                await set(ref(this.database, "loginRequests/" + user.userUUID + "/" + keys[i]), null);
+              }
+            }
+
+            if (haveBeenKicked === true) {
+              this.loginReqFailed.next(true);
+              console.log("kickan sam");
+            }
+          }
+        },
+          {
+            onlyOnce: false
+          }
+        );
     }
-    catch(e){
+    catch (e) {
       console.log("DB error");
       console.log(e);
     }
   }
 
-  async checkMyUserLoginRequestsManually(userUUID: string): Promise<string[]>{
-    let snapshot = await get(child(ref(this.database), "loginRequests/"+userUUID));
+  async checkMyUserLoginRequestsManually(userUUID: string): Promise<string[]> {
+    let snapshot = await get(child(ref(this.database), "loginRequests/" + userUUID));
     const loginReqData = snapshot.val();
 
     console.log("ovo vracam kao manualne requeste");
     console.log(loginReqData);
     let ret: string[];
-    try{
-      ret = Object.keys(loginReqData); 
-    } catch {}
+    try {
+      ret = Object.keys(loginReqData);
+    } catch { }
     return ret || [];
   }
 
-  async removeRefrenceToMyUserLoginRequests(){
-    if(!!this.refToMyLoginRequests) this.refToMyLoginRequests();
+  async removeRefrenceToMyUserLoginRequests() {
+    if (!!this.refToMyLoginRequests) this.refToMyLoginRequests();
   }
 
 
-  
-  
-  
-  async changeProfilePictureLink(user: User, link: string){
+
+
+
+  async changeProfilePictureLink(user: User, link: string) {
     await set(ref(this.database, "users/" + user.username + "/userImageLink"), link);
   }
 

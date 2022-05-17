@@ -20,29 +20,29 @@ export class HomePage {
     private databaseService: DbService,
     private router: Router,
     private lobbyService: LobbyService,
-  ) {}
+  ) { }
 
-  ngOnInit(){
+  ngOnInit() {
     this.databaseService.allLobbys.subscribe(rez => {
       console.log("novi lobby-i");
       let myLobbyUUID = this.databaseService.whichLobbyDoIBelong(this.userService.user.value?.userUUID);
-      if(!!myLobbyUUID) this.joinLobby(myLobbyUUID);
+      if (!!myLobbyUUID) this.joinLobby(myLobbyUUID);
       console.log(rez);
       this.allLobbys = rez || [];
     })
   }
 
-  ionViewWillEnter(){
+  ionViewWillEnter() {
     console.log("on resume");
     this.databaseService.createReferenceToAllLobbys();
   }
 
-  ionViewWillLeave(){
+  ionViewWillLeave() {
     console.log("on pause");
     this.databaseService.removeReferenceFromAllLobbys();
   }
 
-  async joinLobby(lobbyUUID: string){
+  async joinLobby(lobbyUUID: string) {
     await this.lobbyService.joinLobby(lobbyUUID);
   }
 

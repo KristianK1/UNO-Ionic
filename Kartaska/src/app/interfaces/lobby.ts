@@ -6,7 +6,7 @@ export interface Lobby {
     lobbyUUID: string,
     lobbyName: string,
     lobbyPassword: string,
-    players: User[], 
+    players: User[],
     gameUUID: string,
     previusGameStat: GameStat[],
     adminUUID: string,

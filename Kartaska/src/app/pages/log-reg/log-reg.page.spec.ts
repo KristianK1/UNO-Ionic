@@ -9,7 +9,7 @@ describe('LogRegPage', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ LogRegPage ],
+      declarations: [LogRegPage],
       imports: [IonicModule.forRoot()]
     }).compileComponents();
 

@@ -10,6 +10,7 @@ import { User } from 'src/app/interfaces/user';
 import { Hand } from 'src/app/interfaces/hand';
 import { environment } from 'src/environments/environment.prod';
 import { v4 as uuidv4 } from 'uuid';
+import { CardService } from '../card/card.service';
 @Injectable({
   providedIn: 'root'
 })
@@ -30,7 +31,9 @@ export class DbService {
   refToMyLoginRequests: Unsubscribe;
   myLoginRequestUUID: string = uuidv4();
 
-  constructor() {
+  constructor(
+    private cardService: CardService
+  ) {
     this.app = initializeApp(environment.firebaseConfig);
     this.database = getDatabase();
     this.createReferenceToAllUsers();

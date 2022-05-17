@@ -60,19 +60,6 @@ export class LogRegPage implements OnInit, OnDestroy {
         } catch { }
       }
     });
-    /*this.userService.user.subscribe(user => {
-      console.log(user);
-      setTimeout(() => {
-        try{
-          console.log("DISSMIS CUDNI");
-          
-          if(!!this.loadingContPopup){
-            this.loadingContPopup.dismiss();  
-            console.log("idem dismissat loading controller");
-          }
-        }catch{ console.log("WTF"); }
-      }, 500);
-    });*/
 
     setTimeout(() => {
       initLoad.dismiss();
@@ -139,7 +126,7 @@ export class LogRegPage implements OnInit, OnDestroy {
       let userrr: User = JSON.parse(JSON.stringify(newUser));
       await this.databaseService.registerUser(userrr);
 
-      //this.userService.login(userrr.username, userrr.password);
+      await this.login(userrr.username, userrr.password);
 
       this.username_login = "";
       this.password_login = "";

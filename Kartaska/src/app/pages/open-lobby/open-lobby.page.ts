@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Lobby } from 'src/app/interfaces/lobby';
 import { User } from 'src/app/interfaces/user';
-import { DbService } from 'src/app/services/database/database.service';
+import { DbService } from 'src/app/services/db/db.service';
 import { LobbyService } from 'src/app/services/lobby/lobby.service';
 import { UserService } from 'src/app/services/user/user.service';
 import { v4 as uuidv4} from 'uuid';
@@ -18,10 +18,9 @@ export class OpenLobbyPage implements OnInit {
   lobbyPassword: string = "";
 
   constructor(
-    private databaseService: DbService,
+    private dbService: DbService,
     private userService: UserService,
     private router: Router,
-    private lobbyService: LobbyService,
   ) { }
 
   ngOnInit() {
@@ -43,9 +42,9 @@ export class OpenLobbyPage implements OnInit {
     //me.username = null;
     newLobby.adminUUID = me.userUUID;
 
-    await this.databaseService.getAllLobbysManually();
+    await this.dbService.getAllLobbysManually(true);
 
-    let copyLobby = this.databaseService.allLobbys.value.find(o => o.lobbyName === newLobby.lobbyName);
+    let copyLobby = this.dbService.allLobbys.value.find(o => o.lobbyName === newLobby.lobbyName);
     
     if(!!copyLobby){
       console.log("Postoji lobby sa istim imenom!");
@@ -53,7 +52,7 @@ export class OpenLobbyPage implements OnInit {
       return; 
     }
 
-    await this.databaseService.insertNewLobby(newLobby);
+    await this.dbService.insertNewLobby(newLobby);
     
     this.lobbyName = "";
     this.lobbyPassword = "";

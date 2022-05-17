@@ -2,7 +2,7 @@ import { ChangeDetectorRef, Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { MenuController, Platform } from '@ionic/angular';
 import { User } from './interfaces/user';
-import { DbService } from './services/database/database.service';
+import { DbService } from './services/db/db.service';
 import { LobbyService } from './services/lobby/lobby.service';
 import { UserService } from './services/user/user.service';
 

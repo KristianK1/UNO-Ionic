@@ -10,8 +10,6 @@ import { User } from 'src/app/interfaces/user';
 import { Hand } from 'src/app/interfaces/hand';
 import { environment } from 'src/environments/environment.prod';
 import { v4 as uuidv4 } from 'uuid';
-import { UselessService } from '../useless/useless.service';
-import { LogRegPage } from 'src/app/pages/log-reg/log-reg.page';
 @Injectable({
   providedIn: 'root'
 })
@@ -30,9 +28,7 @@ export class DbService {
   refToLobbys: Unsubscribe;
   refToMyLobby: Unsubscribe;
   refToMyLoginRequests: Unsubscribe;
-  myLoginRequestUUID: string;
-
-  canRemoveLoginRequests: boolean = false;
+  myLoginRequestUUID: string = uuidv4();
   
   constructor() {
     this.app = initializeApp(environment.firebaseConfig);
@@ -88,6 +84,23 @@ export class DbService {
     return true;
   }
 
+  async joinLobby(user: User, lobbyUUID: string){
+    user.password = null;
+    let allLobbys = this.allLobbys.value;
+    for(let i = 0; i<allLobbys.length; i++){
+      if(allLobbys[i].lobbyUUID === lobbyUUID){
+        let findPlayer: User = allLobbys[i].players.find(o => o.userUUID === user.userUUID);
+        if(!findPlayer){
+          allLobbys[i].players.push(user);
+          this.myLobby.next(JSON.parse(JSON.stringify(allLobbys[i])));
+          await set(ref(this.database, 'lobbys/' + lobbyUUID + "/players"), allLobbys[i].players);
+        }
+        //await this.getLobbyManually(lobbyUUID);
+        this.createReferenceToLobby(lobbyUUID);
+        return;
+      }
+    }
+  }
 
   createReferenceToAllUsers() {
     if(!!this.refToAllUsers) {
@@ -135,7 +148,7 @@ export class DbService {
       console.log("SVI LOBBYI - Novi podaci iz baze");
       console.log(DataBase_Lobbys_data);
       if (!DataBase_Lobbys_data) this.allLobbys.next([]);
-
+      else
       try {
         let allLobbys: Lobby[] = [];
         let keys = Object.keys(DataBase_Lobbys_data);
@@ -318,12 +331,15 @@ export class DbService {
   }
 
 
-  async makeLoginRequest(userUUID: string, requestUUID: string){
-    this.myLoginRequestUUID = requestUUID;
-    await set(ref(this.database, "loginRequests/"+userUUID + "/" + requestUUID), true);
+  async makeLoginRequest(userUUID: string, requestUUID: string){    
+    await set(ref(this.database, "loginRequests/" + userUUID + "/" + this.myLoginRequestUUID), true);
   }
 
-
+  async removeMyLoginRequest(userUUID: string){
+    //reqUUID se nalazi u database servisu
+    await set(ref(this.database, "loginRequests/"+userUUID+"/" + this.myLoginRequestUUID), null);
+  }
+  
   async createRefrenceToMyUserLoginRequests(user: User){
     if(!!this.refToMyLoginRequests) {
       this.refToMyLoginRequests();
@@ -339,24 +355,24 @@ export class DbService {
           this.loginReqFailed.next(true);
           console.log("kickan sam");
         }
-        console.log("New log req data");
-        let keys = Object.keys(loginReqData);
-        let haveBeenKicked = true;
-        for (let i: number = 0; i < keys.length; i++) {
-          //let temp: boolean = loginReqData[keys[i]];
-          console.log("login REQ br " + i + " " + keys[i]);
-          if(keys[i] === this.myLoginRequestUUID) haveBeenKicked = false;
-          else{
-            if(this.canRemoveLoginRequests === true){
+        else{
+          console.log("New log req data");
+          let keys = Object.keys(loginReqData);
+          let haveBeenKicked = true;
+          for (let i: number = 0; i < keys.length; i++) {
+            //let temp: boolean = loginReqData[keys[i]];
+            console.log("login REQ br " + i + " " + keys[i]);
+            if(keys[i] === this.myLoginRequestUUID) haveBeenKicked = false;
+            else{
               console.log("uklanjam request " + keys[i]);
               await set(ref(this.database, "loginRequests/"+user.userUUID+"/" + keys[i]), null);
             }
           }
-        }
 
-        if(haveBeenKicked === true) {
-          this.loginReqFailed.next(true);
-          console.log("kickan sam");
+          if(haveBeenKicked === true) {
+            this.loginReqFailed.next(true);
+            console.log("kickan sam");
+          }
         }
       },
       {
@@ -376,10 +392,23 @@ export class DbService {
 
     console.log("ovo vracam kao manualne requeste");
     console.log(loginReqData);
-    return loginReqData || [];
+    let ret: string[];
+    try{
+      ret = Object.keys(loginReqData); 
+    } catch {}
+    return ret || [];
   }
 
   async removeRefrenceToMyUserLoginRequests(){
     if(!!this.refToMyLoginRequests) this.refToMyLoginRequests();
   }
+
+
+  
+  
+  
+  async changeProfilePictureLink(user: User, link: string){
+    await set(ref(this.database, "users/" + user.username + "/userImageLink"), link);
+  }
+
 }

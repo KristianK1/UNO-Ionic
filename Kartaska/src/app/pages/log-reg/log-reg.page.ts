@@ -6,7 +6,8 @@ import { FireStorageService } from 'src/app/services/fireStorage/fire-storage.se
 import { StorageService } from 'src/app/services/storage/storage.service';
 import { UserService } from 'src/app/services/user/user.service';
 import { v4 as uuidv4 } from 'uuid';
-import { LoadingController } from '@ionic/angular';
+import { IonGrid, LoadingController } from '@ionic/angular';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-log-reg',
@@ -31,6 +32,7 @@ export class LogRegPage implements OnInit, OnDestroy {
     private cameraService: CameraService,
     private fireStorageService: FireStorageService,
     public loadingController: LoadingController,
+    private router: Router,
   ) { }
 
   async ngOnInit() {
@@ -58,21 +60,23 @@ export class LogRegPage implements OnInit, OnDestroy {
         } catch { }
       }
     });
-    this.userService.user.subscribe(user => {
+    /*this.userService.user.subscribe(user => {
       console.log(user);
       setTimeout(() => {
         try{
+          console.log("DISSMIS CUDNI");
+          
           if(!!this.loadingContPopup){
             this.loadingContPopup.dismiss();  
             console.log("idem dismissat loading controller");
           }
         }catch{ console.log("WTF"); }
-      }, 2000);
-    })
+      }, 500);
+    });*/
 
     setTimeout(() => {
       initLoad.dismiss();
-    }, 5000);
+    }, 500);
     
   }
   ngOnDestroy (){
@@ -90,23 +94,23 @@ export class LogRegPage implements OnInit, OnDestroy {
     if(!!this.loadingContPopup){
       this.loadingContPopup.dismiss();
       console.log("also wtf");
-      
     }
     this.loadingContPopup = await this.loadingController.create({
       message: 'Please wait...',
     });
     await this.loadingContPopup.present();
     console.log("PRESENTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT");
-    
-    if(!!username && !!password){
-      console.log("storage login");
-      //this.userService.login(username, password);
-    }
-    else{
-      console.log("normal login");
-      //this.userService.login(this.username_login, this.password_login);
 
-    }
+    //pocinje proces logiranja
+    let loggedIn = await this.userService.login(username || this.username_login, password ||this.password_login);
+    console.log("loggedIn = " + loggedIn);
+    if(loggedIn){
+      this.router.navigate(["mainApp/home"]);
+    } 
+    //zavrsava proces logiranja
+    console.log("dismisssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss");
+    
+    this.loadingContPopup.dismiss();
   }
 
   async insertImage() {

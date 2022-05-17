@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Lobby } from 'src/app/interfaces/lobby';
 import { User } from 'src/app/interfaces/user';
-import { DbService } from '../database/database.service';
+import { DbService } from '../db/db.service';
 import { UserService } from '../user/user.service';
 
 @Injectable({
@@ -13,13 +13,13 @@ export class LobbyService {
   myLobby: Lobby;
   constructor(
     private userService: UserService,
-    private databaseService: DbService,
+    private dbService: DbService,
     private router: Router,
   ) {
-    this.databaseService.myLobby.subscribe(lobby => {
+    this.dbService.myLobby.subscribe(lobby => {
       if(!lobby) {
         this.myLobby = null; 
-        this.databaseService.removeReferenceFromLobby();
+        this.dbService.removeReferenceFromLobby();
         this.router.navigate(["mainApp/home"]);
         return;
       }
@@ -28,7 +28,7 @@ export class LobbyService {
       let meInLobby = this.myLobby.players.find(o => o.userUUID === this.userService.user.value.userUUID);
 
       if(!meInLobby){
-        this.databaseService.removeReferenceFromLobby();
+        this.dbService.removeReferenceFromLobby();
         this.router.navigate(["mainApp/home"]);
       }
 
@@ -40,29 +40,29 @@ export class LobbyService {
     let me: User = this.userService.user.value;
     me = JSON.parse(JSON.stringify(me));
     me.password = null; 
-    await this.databaseService.joinLobby(me, lobbyUUID);
+    await this.dbService.joinLobby(me, lobbyUUID);
     this.router.navigate(["mainApp/lobby"]);
   }
 
   async leaveLobby(){
-    let lobbyUUID = this.databaseService.myLobby.value?.lobbyUUID;
+    let lobbyUUID = this.dbService.myLobby.value?.lobbyUUID;
     if(!this.myLobby) return;
-    if(this.databaseService.myLobby.value.players.length === 1){
+    if(this.dbService.myLobby.value.players.length === 1){
       //ja sam zadnji igrac da ode
-      this.databaseService.removeLobby(lobbyUUID);
+      this.dbService.removeLobby(lobbyUUID);
     }
-    else if(this.databaseService.myLobby.value.adminUUID === this.userService.user.value.userUUID){
+    else if(this.dbService.myLobby.value.adminUUID === this.userService.user.value.userUUID){
       //ja sam admin
-      this.databaseService.alterLobbyAdmin(lobbyUUID, this.databaseService.myLobby.value.players[1].userUUID);
+      this.dbService.alterLobbyAdmin(lobbyUUID, this.dbService.myLobby.value.players[1].userUUID);
     }
     
-    await this.databaseService.removePlayerFromLobby(
-      this.databaseService.myLobby.value.lobbyUUID, 
+    await this.dbService.removePlayerFromLobby(
+      this.dbService.myLobby.value.lobbyUUID, 
       this.userService.user.value.userUUID
     );
 
 
-    this.databaseService.myLobby.next(null);
+    this.dbService.myLobby.next(null);
     
     this.router.navigate(["mainApp/home"]);
   }

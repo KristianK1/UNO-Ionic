@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Lobby } from 'src/app/interfaces/lobby';
 import { User } from 'src/app/interfaces/user';
-import { DatabaseService } from '../database/database.service';
+import { DbService } from '../database/database.service';
 import { UserService } from '../user/user.service';
 
 @Injectable({
@@ -13,7 +13,7 @@ export class LobbyService {
   myLobby: Lobby;
   constructor(
     private userService: UserService,
-    private databaseService: DatabaseService,
+    private databaseService: DbService,
     private router: Router,
   ) {
     this.databaseService.myLobby.subscribe(lobby => {

@@ -2,7 +2,7 @@ import { ChangeDetectorRef, Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { MenuController, Platform } from '@ionic/angular';
 import { User } from './interfaces/user';
-import { DatabaseService } from './services/database/database.service';
+import { DbService } from './services/database/database.service';
 import { LobbyService } from './services/lobby/lobby.service';
 import { UserService } from './services/user/user.service';
 
@@ -28,7 +28,7 @@ export class AppComponent {
     private platform: Platform,
     private userService: UserService,
     private changeDetector: ChangeDetectorRef,
-    private databaseService: DatabaseService,
+    private databaseService: DbService,
     private router: Router,
     private lobbyService: LobbyService,
     ) {

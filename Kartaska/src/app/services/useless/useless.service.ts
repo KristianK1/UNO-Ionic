@@ -6,7 +6,6 @@ import { BehaviorSubject } from 'rxjs';
 })
 export class UselessService {
 
-  loginReqFailed: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
   constructor() {}
 }

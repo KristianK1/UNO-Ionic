@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { Router, RouterState } from '@angular/router';
 import { Lobby } from 'src/app/interfaces/lobby';
 import { User } from 'src/app/interfaces/user';
-import { DatabaseService } from 'src/app/services/database/database.service';
+import { DbService } from 'src/app/services/database/database.service';
 import { LobbyService } from 'src/app/services/lobby/lobby.service';
 import { UserService } from 'src/app/services/user/user.service';
 
@@ -17,7 +17,7 @@ export class HomePage {
 
   constructor(
     private userService: UserService,
-    private databaseService: DatabaseService,
+    private databaseService: DbService,
     private router: Router,
     private lobbyService: LobbyService,
   ) {}

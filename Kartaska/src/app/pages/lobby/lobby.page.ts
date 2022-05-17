@@ -1,10 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
 import { Lobby } from 'src/app/interfaces/lobby';
 import { User } from 'src/app/interfaces/user';
-import { CardService } from 'src/app/services/card/card.service';
-import { DatabaseService } from 'src/app/services/database/database.service';
-import { LobbyService } from 'src/app/services/lobby/lobby.service';
+import { DbService } from 'src/app/services/db/db.service';
 import { UserService } from 'src/app/services/user/user.service';
 
 @Component({
@@ -21,12 +18,9 @@ export class LobbyPage implements OnInit {
 
   newMessage: string;
 
-  constructor(    
-    private lobbyService: LobbyService,
-    private databaseService: DatabaseService,
+  constructor(
+    private databaseService: DbService,
     private userService: UserService,
-    private router: Router,
-    private cardService: CardService
   ) { }
 
   ngOnInit() {

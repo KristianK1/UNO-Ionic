@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CameraService } from 'src/app/services/camera/camera.service';
-import { DatabaseService } from 'src/app/services/database/database.service';
+import { DbService } from 'src/app/services/database/database.service';
 import { FireStorageService } from 'src/app/services/fireStorage/fire-storage.service';
 import { LobbyService } from 'src/app/services/lobby/lobby.service';
 import { UserService } from 'src/app/services/user/user.service';
@@ -19,7 +19,7 @@ export class AccountSettingsPage implements OnInit {
   constructor(
     private userService: UserService,
     private cameraService: CameraService,
-    private databaseService: DatabaseService,
+    private databaseService: DbService,
     private fireStorageService: FireStorageService,
     private changeDetector: ChangeDetectorRef,
     private router: Router,

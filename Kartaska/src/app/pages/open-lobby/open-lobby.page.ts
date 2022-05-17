@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Lobby } from 'src/app/interfaces/lobby';
 import { User } from 'src/app/interfaces/user';
-import { DatabaseService } from 'src/app/services/database/database.service';
+import { DbService } from 'src/app/services/database/database.service';
 import { LobbyService } from 'src/app/services/lobby/lobby.service';
 import { UserService } from 'src/app/services/user/user.service';
 import { v4 as uuidv4} from 'uuid';
@@ -18,7 +18,7 @@ export class OpenLobbyPage implements OnInit {
   lobbyPassword: string = "";
 
   constructor(
-    private databaseService: DatabaseService,
+    private databaseService: DbService,
     private userService: UserService,
     private router: Router,
     private lobbyService: LobbyService,

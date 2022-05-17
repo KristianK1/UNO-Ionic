@@ -2,10 +2,10 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { User } from 'src/app/interfaces/user';
-import { DatabaseService } from '../database/database.service';
 import { StorageService } from '../storage/storage.service';
 import { v4 as uuidv4 } from 'uuid';
 import { UselessService } from '../useless/useless.service';
+import { DbService } from '../db/db.service';
 
 @Injectable({
   providedIn: 'root',
@@ -17,17 +17,18 @@ export class UserService {
   loginReqFailedVar: boolean;
 
   constructor(
-    private dbService: DatabaseService,
+    private dbService: DbService,
     private router: Router,
     private storageService: StorageService,
     private uselessService: UselessService,
   ) {
-    this.uselessService.loginReqFailed.subscribe(rez => {
+    /*this.dbService.loginReqFailed.subscribe(rez => {
       if(rez === true){
         this.loginReqFailed();
         this.loginReqFailedVar = true;
       }
-    })
+    });
+    */
     this.loginRequestUUID = uuidv4();
     dbService.allUsers.subscribe(allUsers => {
       if(!!this.user.value){
@@ -41,13 +42,13 @@ export class UserService {
         console.log("ovo sam ja");
         console.log(myself);
         if(!myself){
-          this.logout();
+          //this.logout();
         }
       }
     });
   }
 
-  async login(name: string, pass: string): Promise<boolean> {
+  /*async login(name: string, pass: string): Promise<boolean> {
     console.log("idem se logirat");
     console.log("svi korisnici");
     console.log(this.dbService.allUsers.value);
@@ -103,9 +104,9 @@ export class UserService {
       }
     }
     return false;
-  }
+  }*/
 
-  async logout() {
+  /*async logout() {
     await this.storageService.removeData(this.loginDataStorageKey);
     this.dbService.canRemoveLoginRequests = false;
     await this.dbService.removeRefrenceToMyUserLoginRequests();
@@ -114,14 +115,14 @@ export class UserService {
     } catch{}
     this.user.next(null);
     this.router.navigate(["log-reg"]);
-  }
+  }*/
 
-  async loginReqFailed(){
+  /*async loginReqFailed(){
     console.log("loq req failed userService");
     await this.storageService.removeData(this.loginDataStorageKey);
     this.dbService.canRemoveLoginRequests = false;
     await this.dbService.removeRefrenceToMyUserLoginRequests();
     this.user.next(null);
     this.router.navigate(["log-reg"]);
-  }
+  }*/
 }

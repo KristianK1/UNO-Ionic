@@ -439,7 +439,7 @@ export class DbService {
 
   async playCard(card: Card, gameUUID: string, userUUID: string){
 
-    let moves: Car = this.myGame.value.moves;
+    let moves: Card[] = this.myGame.value.moves;
     //await set(ref(this.database, "games/" + gameUUID + "/moves"),moves);
   }
 

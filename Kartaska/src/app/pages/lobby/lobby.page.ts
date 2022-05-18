@@ -1,7 +1,11 @@
 import { Component, OnInit } from '@angular/core';
+import { Card } from 'src/app/interfaces/card';
+import { Game } from 'src/app/interfaces/game';
+import { Hand } from 'src/app/interfaces/hand';
 import { Lobby } from 'src/app/interfaces/lobby';
 import { User } from 'src/app/interfaces/user';
 import { DbService } from 'src/app/services/db/db.service';
+import { LobbyService } from 'src/app/services/lobby/lobby.service';
 import { UserService } from 'src/app/services/user/user.service';
 
 @Component({
@@ -12,15 +16,21 @@ import { UserService } from 'src/app/services/user/user.service';
 export class LobbyPage implements OnInit {
 
   myLobby: Lobby;
+  myGame: Game;
   me: User;
+  myCards: Card[];
+  MyCardsPlayable: Card[];
 
   isAdmin: boolean;
 
   newMessage: string;
 
+  dispMyCards: string[] = []
+
   constructor(
     private dbService: DbService,
     private userService: UserService,
+    private lobbyService: LobbyService,
   ) { }
 
   ngOnInit() {
@@ -42,6 +52,16 @@ export class LobbyPage implements OnInit {
 
       }
     });
+
+    this.dbService.myGame.subscribe(rez => {
+      if (!!rez) {
+        this.myGame = rez;
+        let myHand: Hand = rez.playerCards.find(o => o.userUUID === this.userService.user.value.userUUID);
+        console.log("my Hand");
+        console.log(myHand);
+        this.myCards = myHand.cards;
+      }
+    });
   }
 
   onEnter() {
@@ -59,6 +79,17 @@ export class LobbyPage implements OnInit {
   }
 
   async startGame() {
-    await this.dbService.createGame(this.dbService.myLobby.value.lobbyUUID);
+    await this.lobbyService.createGame(this.dbService.myLobby.value.lobbyUUID);
+  }
+
+  cardClick(i: number){
+    let card: Card = this.myCards[i];
+    console.log(card);
+    
+  }
+  
+  sendCard(card: Card){
+    if(card.color==="black") card.preferedNextColor = "blue"; //TODO modal?
+    
   }
 }

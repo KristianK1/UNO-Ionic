@@ -1,9 +1,16 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
+import { Game } from 'src/app/interfaces/game';
+import { GameStat } from 'src/app/interfaces/game-stat';
+import { Hand } from 'src/app/interfaces/hand';
 import { Lobby } from 'src/app/interfaces/lobby';
 import { User } from 'src/app/interfaces/user';
+import { CardService } from '../card/card.service';
 import { DbService } from '../db/db.service';
 import { UserService } from '../user/user.service';
+import { v4 as uuidv4 } from 'uuid';
+import { LogRegPage } from 'src/app/pages/log-reg/log-reg.page';
+import { Card } from 'src/app/interfaces/card';
 
 @Injectable({
   providedIn: 'root'
@@ -15,6 +22,7 @@ export class LobbyService {
     private userService: UserService,
     private dbService: DbService,
     private router: Router,
+    private cardService: CardService,
   ) {
     this.dbService.myLobby.subscribe(lobby => {
       if (!lobby) {
@@ -32,6 +40,24 @@ export class LobbyService {
         this.router.navigate(["mainApp/home"]);
       }
 
+      if (!!this.myLobby.gameUUID) {
+        if(!!this.dbService.myGame.value){
+          console.log("gameUUID u myLobbyu ali nista u myGame BehSub-u");
+          this.dbService.createReferenceToGame(this.myLobby.gameUUID);
+        }
+        else if (this.myLobby.gameUUID !== this.dbService.myGame.value?.gameUUID) {
+          console.log("game je promjenjen il tako nesto");
+          this.dbService.createReferenceToGame(this.myLobby.gameUUID);
+        }
+      }
+      else {
+        console.log("ne igra se game");
+      }
+    });
+
+    this.dbService.myGame.subscribe(rez => {
+      console.log(rez);
+      if (!rez) this.dbService.removeReferenceToGame();
     });
   }
 
@@ -65,6 +91,39 @@ export class LobbyService {
     this.dbService.myLobby.next(null);
 
     this.router.navigate(["mainApp/home"]);
+  }
+
+  async createGame(lobbyUUID: string) {
+    let newGame: Game = <Game>{};
+    newGame.gameUUID = uuidv4();
+    newGame.gameStat = <GameStat>{};
+    newGame.moves = [];
+    newGame.direction = true;
+    newGame.cardOrder = [];
+    for (let i = 0; i < 108; i++) {
+      newGame.cardOrder.push(this.cardService.numToCard(i));
+    }
+    newGame.cardOrder = this.cardService.randOrder(newGame.cardOrder);
+
+    newGame.playerCards = [];
+
+    newGame.moves.push(newGame.cardOrder[0]);
+    for (let i = 0; i < this.dbService.myLobby.value.players.length; i++) {
+      let hand: Hand = <Hand>{};
+      hand.userUUID = this.dbService.myLobby.value.players[i].userUUID;
+
+      let cards: Card[] = [];
+      for (let j = 0; j < 7; j++) {
+        cards.push(newGame.cardOrder[7 * i + j + 1]);
+      }
+      hand.cards = cards;
+      newGame.playerCards.push(hand)
+    }
+    console.log("GAMEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
+
+    console.log(newGame);
+
+    await this.dbService.createGame(newGame, lobbyUUID);
   }
 
 

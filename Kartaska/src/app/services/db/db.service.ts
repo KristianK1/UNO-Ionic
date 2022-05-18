@@ -11,6 +11,7 @@ import { Hand } from 'src/app/interfaces/hand';
 import { environment } from 'src/environments/environment.prod';
 import { v4 as uuidv4 } from 'uuid';
 import { CardService } from '../card/card.service';
+import { Card } from 'src/app/interfaces/card';
 @Injectable({
   providedIn: 'root'
 })
@@ -19,6 +20,7 @@ export class DbService {
   allUsers: BehaviorSubject<Array<User>> = new BehaviorSubject<Array<User>>([]);
   allLobbys: BehaviorSubject<Array<Lobby>> = new BehaviorSubject<Array<Lobby>>([]);
   myLobby: BehaviorSubject<Lobby> = new BehaviorSubject<Lobby>(null);
+  myGame: BehaviorSubject<Game> = new BehaviorSubject<Game>(null);
 
   loginReqFailed: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
@@ -29,6 +31,8 @@ export class DbService {
   refToLobbys: Unsubscribe;
   refToMyLobby: Unsubscribe;
   refToMyLoginRequests: Unsubscribe;
+  refToGame: Unsubscribe;
+
   myLoginRequestUUID: string = uuidv4();
 
   constructor(
@@ -294,30 +298,7 @@ export class DbService {
     return true
   }
 
-  async createGame(lobbyUUID: string) {
-    let newGame: Game = <Game>{};
-    newGame.gameUUID = uuidv4();
-    newGame.gameStat = <GameStat>{};
-    newGame.moves = [];
-    newGame.cardOrder = [];
-    for (let i = 0; i < 108; i++) {
-      newGame.cardOrder.push(i);
-    }
-    newGame.cardOrder = this.cardService.randOrder(newGame.cardOrder);
-    
-    newGame.playerCards = [];
-    for (let i = 0; i < this.myLobby.value.players.length; i++) {
-      let hand: Hand = <Hand>{};
-      hand.userUUID = this.myLobby.value.players[i].userUUID;
-
-      let cards: number[] = [];
-      for (let j = 0; j < 7; j++) {
-        cards.push(newGame.cardOrder[7 * i + j]);
-      }
-      hand.cards = cards;
-      newGame.playerCards.push(hand)
-    }
-
+  async createGame(newGame: Game, lobbyUUID: string) {
     await set(ref(this.database, "lobbys/" + lobbyUUID + "/gameUUID"), newGame.gameUUID);
     await set(ref(this.database, "games/" + newGame.gameUUID), newGame);
   }
@@ -410,12 +391,56 @@ export class DbService {
     if (!!this.refToMyLoginRequests) this.refToMyLoginRequests();
   }
 
-
-
-
-
   async changeProfilePictureLink(user: User, link: string) {
     await set(ref(this.database, "users/" + user.username + "/userImageLink"), link);
+  }
+
+  async createReferenceToGame(gameUUID: string) {
+    if (!!this.refToGame) {
+      this.refToGame();
+      this.refToGame = undefined;
+    }
+    try {
+      this.refToGame =
+        onValue(ref(this.database, "games/" + gameUUID), async (snapshot) => {
+
+          const gameData = (snapshot.val());
+
+          if (!gameData) {
+            console.log("nema game-a");
+          }
+          else {
+            console.log("parsanje gameData (refToGame) u beh sub");
+            try {
+              let tempGame: Game = gameData;
+              this.myGame.next(tempGame)
+            } catch {
+              console.log("fejalalo parsanje");
+            }
+          }
+        },
+          {
+            onlyOnce: false
+          }
+        );
+    }
+    catch (e) {
+      console.log("DB error");
+      console.log(e);
+    }
+  }
+
+  async removeReferenceToGame(){
+    if (!!this.refToGame) {
+      this.refToGame();
+      this.refToGame = undefined;
+    }
+  }
+
+  async playCard(card: Card, gameUUID: string, userUUID: string){
+
+    let moves: Car = this.myGame.value.moves;
+    //await set(ref(this.database, "games/" + gameUUID + "/moves"),moves);
   }
 
 }

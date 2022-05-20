@@ -66,8 +66,11 @@ export class CardService {
   }
 
   randOrder(polje: any[]): any[] {
-    let poljeC: number[] = JSON.parse(JSON.stringify(polje));
+    let poljeC: any[] = JSON.parse(JSON.stringify(polje));
     poljeC = poljeC.sort((a, b) => (this.betterRand() > this.betterRand()) ? 1 : -1);
+    console.log("ovo returnam kao rand polje");
+    console.log(JSON.parse(JSON.stringify(poljeC)));
+        
     return poljeC;
   }
 
@@ -137,6 +140,8 @@ export class CardService {
     */
     return card;
   }
+
+  
   /*
     @param deck
       Polje svih karata odigranih do sada
@@ -154,6 +159,11 @@ export class CardService {
 
   */
   nextCards(deck: Card[], myCards: Card[]): AvailableMoves {
+    console.log("ulazni podaci u next cards");
+    console.log(JSON.parse(JSON.stringify(deck)));
+    console.log(JSON.parse(JSON.stringify(myCards)));
+    
+    
     if (!deck) {
       console.log("neispravni podaci u nextCards - deck");
       return null;
@@ -179,7 +189,7 @@ export class CardService {
 
     //black cards
     if (lastCard.value === "+4") {
-      validCards = myCards.filter(o => (o.color === lastCard.preferedNextColor) || (o.color === "black" && o.value === "+4"));
+      validCards = myCards.filter(o => o.color === "black" && o.value === "+4");
 
       let drawN = 0;
       for (let i = deck.length - 1; i >= 0; i--) {
@@ -189,7 +199,7 @@ export class CardService {
 
 
       fakeCard.color = lastCard.preferedNextColor;
-      return { validCards: validCards, drawN: drawN, fakeCard: fakeCard };
+      return { validCards: validCards, drawN: drawN, fakeCard: fakeCard};
     }
 
     if (lastCard.value === "blank") {
@@ -202,7 +212,7 @@ export class CardService {
 
     //normal cards
     if (lastCard.value !== "+2" && lastCard.value !== "skip" && lastCard.value !== "chDir" && lastCard.value !== "theNothing") {
-      validCards = myCards.filter(o => o.color === lastCard.color || o.value === lastCard.value);
+      validCards = myCards.filter(o => o.color === lastCard.color || o.value === lastCard.value || o.color === "black");
       return { validCards: validCards, drawN: 1, fakeCard: fakeCard };
     }
     //end normal cards
@@ -215,28 +225,40 @@ export class CardService {
         if (deck[i].value === "+2") drawN = drawN + 2;
         else break;
       }
-      return { validCards: validCards, drawN: drawN, fakeCard: fakeCard };
+      return { validCards: validCards, drawN: drawN, fakeCard: fakeCard, forceSkip: true };
     }
     //end +2 cards
 
     //skip cards
     if (lastCard.value === "skip") {
-      return { validCards: [], drawN: 0, fakeCard: fakeCard };
+      return { validCards: [], drawN: 0, fakeCard: fakeCard, forceSkip: true };
     }
     //end skip cards
 
     //reverse cards
     if (lastCard.value === "chDir") {
-      return { validCards: [], reverseOrder: true, drawN: 0, fakeCard: fakeCard };
+      return { validCards: [], reverseOrder: true, drawN: 0, fakeCard: fakeCard, forceSkip: true };
     }
     // end reverse cards
 
     //theNothing card
     if (lastCard.value === "theNothing") {
       validCards = myCards.filter(o => o.color === lastCard.color || o.color === "black");
+      return { validCards: validCards, reverseOrder: true, drawN: 1, fakeCard: fakeCard };
     }
     //end theNothing card
 
 
+  }
+
+  isEql(a: Card, b: Card): boolean{
+    return a.color === b.color && a.value === b.value
+  }
+
+  isValidStartCard(card: Card): boolean{
+    if(card.value !== "+2" && card.value !== "skip" && card.value !== "chDir" && card.value !== "theNothing" && card.color !== "black"){
+      return true;
+    }
+    return false;
   }
 }

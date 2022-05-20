@@ -12,6 +12,7 @@ import { environment } from 'src/environments/environment.prod';
 import { v4 as uuidv4 } from 'uuid';
 import { CardService } from '../card/card.service';
 import { Card } from 'src/app/interfaces/card';
+import { Move } from 'src/app/interfaces/move';
 @Injectable({
   providedIn: 'root'
 })
@@ -411,6 +412,8 @@ export class DbService {
           }
           else {
             console.log("parsanje gameData (refToGame) u beh sub");
+            console.log(gameData);
+
             try {
               let tempGame: Game = gameData;
               this.myGame.next(tempGame)
@@ -430,17 +433,89 @@ export class DbService {
     }
   }
 
-  async removeReferenceToGame(){
+  async removeReferenceToGame() {
     if (!!this.refToGame) {
       this.refToGame();
       this.refToGame = undefined;
     }
   }
 
-  async playCard(card: Card, gameUUID: string, userUUID: string){
+  async playCards(cards: Card[], gameUUID: string, userUUID: string) {
+    let myGame: Game = JSON.parse(JSON.stringify(this.myGame.value));
+    let moves: Move[] = myGame.moves;
+    let usedDeck: Card[] = myGame.usedDeck;
+    let myHand: Hand = JSON.parse(JSON.stringify(myGame.playerCards.find(o => o.userUUID == userUUID)));
+    for (let card of cards) {
+      let move: Move = <Move>{};
+      move.card = card;
+      move.userUUID = userUUID;
+      moves.push(move);
+      usedDeck.push(card);
+      let wasRemoved = false;
+      for (let i = 0; i < myHand.cards.length; i++) {
+        if (myHand.cards[i].color === card.color && myHand.cards[i].value === card.value) {
+          myHand.cards.splice(i, 1);
+          wasRemoved = true;
+        }
+      }
+      if (wasRemoved === false) console.log("\n\n\n\n\n\n\n\n\n\nWASNT REMOVED");
+      for (let i = 0; i < myGame.playerCards.length; i++) {
+        if (myGame.playerCards[i].userUUID === userUUID) {
+          myGame.playerCards[i] = myHand;
+        }
+      }
 
-    let moves: Card[] = this.myGame.value.moves;
-    //await set(ref(this.database, "games/" + gameUUID + "/moves"),moves);
+    }
+
+    console.log("playerCards nakon bacanja");
+    console.log(JSON.parse(JSON.stringify(myGame.playerCards)));
+
+
+    myGame.moves = moves;
+    myGame.usedDeck = usedDeck;
+    await set(ref(this.database, "games/" + gameUUID), myGame);
   }
+
+  async playNothingCard(card: Card, reverse: boolean, gameUUID: string, userUUID: string) {
+    let myGame = this.myGame.value;
+    if (!!reverse)
+      myGame.direction = !myGame.direction;
+
+    myGame.moves.push({ card: card, userUUID: userUUID });
+
+    await set(ref(this.database, "games/" + gameUUID), myGame);
+  }
+
+  drawCards(n: number, gameUUID: string, userUUID: string): Game {
+    console.log("vucem " + n);
+    
+    let unUsedCards: Card[] = this.myGame.value.unUsedDeck || [];
+    unUsedCards = this.cardService.randOrder(unUsedCards);
+    let chosenCards: Card[] = [];
+    for (let i = 0; i < n; i++) {
+      if (unUsedCards.length > 0) {
+        chosenCards.push(unUsedCards.splice(0, 1)[0]);
+      }
+    }
+    let myGame = this.myGame.value;
+    myGame.unUsedDeck = unUsedCards;
+
+    for (let i = 0; i < myGame.playerCards.length; i++) {
+      if (myGame.playerCards[i].userUUID === userUUID) {
+        myGame.playerCards[i].cards = myGame.playerCards[i].cards.concat(chosenCards);
+        console.log(myGame.playerCards[i].cards);
+        
+      }
+    }
+    //await set(ref(this.database, "games/" + gameUUID), myGame);
+    
+    return myGame;
+  }
+
+  async setGame(game: Game){
+    await set(ref(this.database, "games/" + game.gameUUID), game);
+  }
+
+
 
 }

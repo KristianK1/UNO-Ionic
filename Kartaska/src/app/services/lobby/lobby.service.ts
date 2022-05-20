@@ -11,6 +11,7 @@ import { UserService } from '../user/user.service';
 import { v4 as uuidv4 } from 'uuid';
 import { LogRegPage } from 'src/app/pages/log-reg/log-reg.page';
 import { Card } from 'src/app/interfaces/card';
+import { Move } from 'src/app/interfaces/move';
 
 @Injectable({
   providedIn: 'root'
@@ -58,7 +59,7 @@ export class LobbyService {
     this.dbService.myGame.subscribe(rez => {
       console.log(rez);
       if (!rez) this.dbService.removeReferenceToGame();
-    });
+      });
   }
 
   async joinLobby(lobbyUUID: string) {
@@ -99,29 +100,57 @@ export class LobbyService {
     newGame.gameStat = <GameStat>{};
     newGame.moves = [];
     newGame.direction = true;
-    newGame.cardOrder = [];
+    newGame.unUsedDeck = [];
+    newGame.usedDeck = [];
+    
     for (let i = 0; i < 108; i++) {
-      newGame.cardOrder.push(this.cardService.numToCard(i));
+      newGame.unUsedDeck.push(this.cardService.numToCard(i));
     }
-    newGame.cardOrder = this.cardService.randOrder(newGame.cardOrder);
+    console.log("NE  promjesan deck");
+    
+    console.log(newGame.unUsedDeck);
+    newGame.unUsedDeck = this.cardService.randOrder(newGame.unUsedDeck);
+    console.log("JEDANPUT promjesan deck");
+    
+    console.log(newGame.unUsedDeck);
 
+    while(this.cardService.isValidStartCard(newGame.unUsedDeck[0]) === false){
+      newGame.unUsedDeck = this.cardService.randOrder(newGame.unUsedDeck);
+    }
+    console.log("promjesan deck");
+    
+    console.log(newGame.unUsedDeck);
+    
     newGame.playerCards = [];
 
-    newGame.moves.push(newGame.cardOrder[0]);
+    let firstMove: Move = <Move>{};
+    firstMove.card = newGame.unUsedDeck[0];
+    firstMove.userUUID = "";
+    
+    newGame.usedDeck.push(newGame.unUsedDeck[0]);
+    newGame.unUsedDeck.splice(0,1);
+
+    console.log("midway");
+    
+    newGame.moves.push(firstMove);
     for (let i = 0; i < this.dbService.myLobby.value.players.length; i++) {
       let hand: Hand = <Hand>{};
       hand.userUUID = this.dbService.myLobby.value.players[i].userUUID;
 
       let cards: Card[] = [];
       for (let j = 0; j < 7; j++) {
-        cards.push(newGame.cardOrder[7 * i + j + 1]);
+        let takenCard = newGame.unUsedDeck[0]; 
+        console.log(takenCard);
+        
+        cards.push(takenCard);
+        newGame.unUsedDeck.splice(0,1);
+        newGame.usedDeck.push(takenCard);
       }
       hand.cards = cards;
       newGame.playerCards.push(hand)
     }
     console.log("GAMEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
-
-    console.log(newGame);
+    console.log(JSON.parse(JSON.stringify(newGame)));
 
     await this.dbService.createGame(newGame, lobbyUUID);
   }

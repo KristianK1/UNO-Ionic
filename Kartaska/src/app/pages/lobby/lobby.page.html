@@ -31,13 +31,15 @@
     Start a new game
   </ion-button>
 
-<!-- <ion-img src="assets/images/black_+4.JPG" style = "width: 100px;">
+  <!-- <ion-img src="assets/images/black_+4.JPG" style = "width: 100px;">
     </ion-img> -->
-  <div *ngIf="true" id="game">
+  <ion-card id="game">
     hello
-    <ion-item *ngFor="let card of myCardsPlayable; let i = index">
-      <ion-img (click)="cardClick(i)" [src]='"../../../assets/images/" + card.color + "_" + card.value + ".JPG"' style="width: 30px;"></ion-img>
-    </ion-item>
-  </div>
+    <ion-list>
+      <ion-item *ngFor="let card of MyCardsPlayable; let i = index" style="height: 200px; width: 200px">
+        <ion-img (click)="cardClick(i)" [src]='"../../../assets/images/" + card.color + "_" + card.value + ".JPG"' style="width: 100px;"></ion-img>
+      </ion-item>
+    </ion-list>
+  </ion-card>
 
 </ion-content>

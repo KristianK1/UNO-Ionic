@@ -4,6 +4,7 @@ export interface AvailableMoves {
     validCards: Card[];
     
     drawN: number;
-    fakeCard?: Card;
+    fakeCard: Card;
     reverseOrder?: boolean;
+    forceSkip?: boolean;
 }

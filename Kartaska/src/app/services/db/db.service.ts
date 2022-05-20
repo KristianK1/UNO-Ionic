@@ -454,8 +454,11 @@ export class DbService {
       let wasRemoved = false;
       for (let i = 0; i < myHand.cards.length; i++) {
         if (myHand.cards[i].color === card.color && myHand.cards[i].value === card.value) {
+          if(myHand.cards[i].value==="chDir"){
+            myGame.direction = !myGame.direction;
+          }
           myHand.cards.splice(i, 1);
-          wasRemoved = true;
+          wasRemoved = true;   
         }
       }
       if (wasRemoved === false) console.log("\n\n\n\n\n\n\n\n\n\nWASNT REMOVED");
@@ -473,13 +476,14 @@ export class DbService {
 
     myGame.moves = moves;
     myGame.usedDeck = usedDeck;
+    console.log("myGame - playCards");
+    console.log(myGame);
+    
     await set(ref(this.database, "games/" + gameUUID), myGame);
   }
 
-  async playNothingCard(card: Card, reverse: boolean, gameUUID: string, userUUID: string) {
+  async playNothingCard(card: Card, gameUUID: string, userUUID: string) {
     let myGame = this.myGame.value;
-    if (!!reverse)
-      myGame.direction = !myGame.direction;
 
     myGame.moves.push({ card: card, userUUID: userUUID });
 
@@ -488,7 +492,7 @@ export class DbService {
 
   drawCards(n: number, gameUUID: string, userUUID: string): Game {
     console.log("vucem " + n);
-    
+
     let unUsedCards: Card[] = this.myGame.value.unUsedDeck || [];
     unUsedCards = this.cardService.randOrder(unUsedCards);
     let chosenCards: Card[] = [];
@@ -504,15 +508,13 @@ export class DbService {
       if (myGame.playerCards[i].userUUID === userUUID) {
         myGame.playerCards[i].cards = myGame.playerCards[i].cards.concat(chosenCards);
         console.log(myGame.playerCards[i].cards);
-        
+
       }
     }
-    //await set(ref(this.database, "games/" + gameUUID), myGame);
-    
     return myGame;
   }
 
-  async setGame(game: Game){
+  async setGame(game: Game) {
     await set(ref(this.database, "games/" + game.gameUUID), game);
   }
 

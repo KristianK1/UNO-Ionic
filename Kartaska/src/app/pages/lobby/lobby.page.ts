@@ -21,7 +21,7 @@ export class LobbyPage implements OnInit {
   myLobby: Lobby;
   myGame: Game;
   me: User;
-  myCards: Card[];
+  myCards: Card[] = [];
   MyCardsPlayable: Card[] = [];
   MyAvailableMoves: AvailableMoves;
 
@@ -107,11 +107,12 @@ export class LobbyPage implements OnInit {
         console.log("moj Red = " + this.mojRed);
 
 
+
+        let myHand: Hand = rez.playerCards.find(o => o.userUUID === this.me.userUUID);
+        console.log("my Hand");
+        console.log(myHand);
+        this.myCards = myHand.cards;
         if (this.mojRed === true) {
-          let myHand: Hand = rez.playerCards.find(o => o.userUUID === this.me.userUUID);
-          console.log("my Hand");
-          console.log(myHand);
-          this.myCards = myHand.cards;
           let stackedCards: Card[] = [];
           for (let move of this.myGame.moves) {
             stackedCards.push(move.card);
@@ -119,13 +120,13 @@ export class LobbyPage implements OnInit {
           this.MyAvailableMoves = this.cardService.nextCards(stackedCards, this.myGame.playerCards[mojI].cards);
           console.log("avaialble moves");
           console.log(JSON.parse(JSON.stringify(this.MyAvailableMoves)));
-          
+
           if (!!this.MyAvailableMoves.forceSkip) {
-            this.dbService.playNothingCard(this.MyAvailableMoves.fakeCard, this.MyAvailableMoves.reverseOrder, this.myGame.gameUUID, this.me.userUUID);
+            this.dbService.playNothingCard(this.MyAvailableMoves.fakeCard, this.myGame.gameUUID, this.me.userUUID);
           }
           else if (this.MyAvailableMoves.drawN > 1 && this.MyAvailableMoves.validCards.length === 0) {
             let myGameTemp: Game = this.dbService.drawCards(this.MyAvailableMoves.drawN, this.myGame.gameUUID, this.me.userUUID);
-            myGameTemp.moves.push({ card: this.MyAvailableMoves.fakeCard, userUUID: this.me.userUUID});
+            myGameTemp.moves.push({ card: this.MyAvailableMoves.fakeCard, userUUID: this.me.userUUID });
             await this.dbService.setGame(myGameTemp);
           }
           else {
@@ -187,5 +188,16 @@ export class LobbyPage implements OnInit {
 
     await this.dbService.playCards(cards, this.myGame.gameUUID, this.me.userUUID);
     this.MyCardsPlayable = [];
+  }
+
+  async takeCardManually() {
+    console.log("alooooooo");
+    
+    if (this.mojRed === true) {
+      console.log("taking ONE card");
+
+      let tempGame: Game = this.dbService.drawCards(1, this.myGame.gameUUID, this.me.userUUID);
+      this.dbService.setGame(tempGame);
+    }
   }
 }

@@ -225,7 +225,7 @@ export class CardService {
         if (deck[i].value === "+2") drawN = drawN + 2;
         else break;
       }
-      return { validCards: validCards, drawN: drawN, fakeCard: fakeCard, forceSkip: true };
+      return { validCards: validCards, drawN: drawN, fakeCard: fakeCard};
     }
     //end +2 cards
 
@@ -237,14 +237,15 @@ export class CardService {
 
     //reverse cards
     if (lastCard.value === "chDir") {
-      return { validCards: [], reverseOrder: true, drawN: 0, fakeCard: fakeCard, forceSkip: true };
+      validCards = myCards.filter(o => (o.color === lastCard.color) || o.color === "black");
+      return { validCards: validCards, drawN: 1, fakeCard: fakeCard};
     }
     // end reverse cards
 
     //theNothing card
     if (lastCard.value === "theNothing") {
       validCards = myCards.filter(o => o.color === lastCard.color || o.color === "black");
-      return { validCards: validCards, reverseOrder: true, drawN: 1, fakeCard: fakeCard };
+      return { validCards: validCards, drawN: 1, fakeCard: fakeCard };
     }
     //end theNothing card
 

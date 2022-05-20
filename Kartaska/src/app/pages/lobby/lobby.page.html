@@ -35,11 +35,32 @@
     </ion-img> -->
   <ion-card id="game">
     hello
-    <ion-list>
-      <ion-item *ngFor="let card of MyCardsPlayable; let i = index" style="height: 200px; width: 200px">
-        <ion-img (click)="cardClick(i)" [src]='"../../../assets/images/" + card.color + "_" + card.value + ".JPG"' style="width: 100px;"></ion-img>
-      </ion-item>
-    </ion-list>
+    <ion-grid>
+      <ion-row>
+        <ion-col size="auto" *ngFor="let card of MyCardsPlayable; let i = index">
+          <ion-item style="height: 200px; width: 200px">
+            <ion-img (click)="cardClick(i)" [src]='"../../../assets/images/" + card.color + "_" + card.value + ".JPG"'
+              style="width: 100px;"></ion-img>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
   </ion-card>
 
+  <ion-button [disabled] = "mojRed === false" (click)="takeCardManually()"> 
+    Take one card
+  </ion-button>
+
+  <ion-card>
+    <ion-grid>
+      <ion-row>
+        <ion-col size="auto" *ngFor="let card of myCards">
+          <ion-item>
+            <ion-img [src]='"../../../assets/images/" + card.color + "_" + card.value + ".JPG"' style="width: 50px;">
+            </ion-img>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ion-card>
 </ion-content>

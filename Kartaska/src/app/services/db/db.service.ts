@@ -13,6 +13,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { CardService } from '../card/card.service';
 import { Card } from 'src/app/interfaces/card';
 import { Move } from 'src/app/interfaces/move';
+import { Message } from 'src/app/interfaces/message';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -22,6 +24,7 @@ export class DbService {
   allLobbys: BehaviorSubject<Array<Lobby>> = new BehaviorSubject<Array<Lobby>>([]);
   myLobby: BehaviorSubject<Lobby> = new BehaviorSubject<Lobby>(null);
   myGame: BehaviorSubject<Game> = new BehaviorSubject<Game>(null);
+  myMessages: BehaviorSubject<Message[]> = new BehaviorSubject<Message[]>([]);
 
   loginReqFailed: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
@@ -33,6 +36,7 @@ export class DbService {
   refToMyLobby: Unsubscribe;
   refToMyLoginRequests: Unsubscribe;
   refToGame: Unsubscribe;
+  refToMyMessages: Unsubscribe;
 
   myLoginRequestUUID: string = uuidv4();
 
@@ -105,6 +109,7 @@ export class DbService {
         }
         //await this.getLobbyManually(lobbyUUID);
         this.createReferenceToLobby(lobbyUUID);
+        this.createRefrenceToMyMessages(this.myLobby.value.chatUUID);
         return;
       }
     }
@@ -454,11 +459,11 @@ export class DbService {
       let wasRemoved = false;
       for (let i = 0; i < myHand.cards.length; i++) {
         if (myHand.cards[i].color === card.color && myHand.cards[i].value === card.value) {
-          if(myHand.cards[i].value==="chDir"){
+          if (myHand.cards[i].value === "chDir") {
             myGame.direction = !myGame.direction;
           }
           myHand.cards.splice(i, 1);
-          wasRemoved = true;   
+          wasRemoved = true;
         }
       }
       if (wasRemoved === false) console.log("\n\n\n\n\n\n\n\n\n\nWASNT REMOVED");
@@ -478,7 +483,7 @@ export class DbService {
     myGame.usedDeck = usedDeck;
     console.log("myGame - playCards");
     console.log(myGame);
-    
+
     await set(ref(this.database, "games/" + gameUUID), myGame);
   }
 
@@ -518,6 +523,58 @@ export class DbService {
     await set(ref(this.database, "games/" + game.gameUUID), game);
   }
 
+  async createRefrenceToMyMessages(chatUUID: string) {
+    if (!!this.refToMyMessages) {
+      this.refToMyMessages();
+      this.refToMyMessages = undefined;
+    }
+    try {
+      this.refToMyMessages =
+        onValue(ref(this.database, "chats/" + chatUUID), async (snapshot) => {
 
+          const messData = (snapshot.val());
+          let messages: Message[] = [];
+          console.log("New mess data");
+          if (!!messData) {
+            let keys = Object.keys(messData);
+
+            for (let i: number = 0; i < keys.length; i++) {
+              messages.push(messData[keys[i]]);
+            }
+            
+            console.log(JSON.parse(JSON.stringify(messages)));
+            
+            messages = messages.sort((a,b) => (b.timeStamp < a.timeStamp)? -1:1);
+            this.myMessages.next(messages);
+          }
+        },
+          {
+            onlyOnce: false
+          }
+        );
+    }
+    catch (e) {
+      console.log("DB error");
+      console.log(e);
+    }
+  }
+
+
+  removeRefrenceToMyMessages() {
+    if (!!this.refToMyMessages) {
+      this.refToMyMessages();
+      this.refToMyMessages = undefined;
+    }
+  }
+
+
+  async sendMessage(user: User, message: string, chatUUID: string) {
+    let newMessage: Message = <Message>{};
+    newMessage.text = message;
+    newMessage.userUUID = user?.userUUID || "";
+    newMessage.userName = user?.username || "System"
+    newMessage.timeStamp = Date.now();
+    await set(ref(this.database, "chats/" + chatUUID + "/" + uuidv4()), newMessage);
+  }
 
 }

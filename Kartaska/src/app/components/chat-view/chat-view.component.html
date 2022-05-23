@@ -1,0 +1,9 @@
+<ion-grid id="chatView">
+  <ion-row>
+    <ion-col *ngFor="let item of chatMessages" size="12">
+      <h5>
+        <b>{{item.userName}}</b>: {{item.text}}
+      </h5>
+    </ion-col>
+  </ion-row>
+</ion-grid>

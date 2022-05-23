@@ -53,16 +53,16 @@ export class AppComponent {
 
     this.platform.resize.subscribe(x => {
       let width: number = this.platform.width();
-      console.log("širina platforme je " + width);
+      //console.log("širina platforme je " + width);
 
-      if (width < 1000) {
+      /*if (width < 1000) {
         this.showMenu = false;
         this.closeMenu();
       }
       else {
         this.showMenu = true;
         this.openMenu();
-      }
+      }*/
     });
 
     this.userService.user.subscribe(user => {

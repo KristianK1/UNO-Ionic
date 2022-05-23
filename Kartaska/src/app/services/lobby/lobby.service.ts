@@ -88,7 +88,7 @@ export class LobbyService {
       this.userService.user.value.userUUID
     );
 
-
+    this.dbService.removeRefrenceToMyMessages();
     this.dbService.myLobby.next(null);
 
     this.router.navigate(["mainApp/home"]);

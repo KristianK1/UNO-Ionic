@@ -1,66 +1,81 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>{{myLobby?.lobbyName}}</ion-title>
-  </ion-toolbar>
-</ion-header>
-
 <ion-content>
-  <ion-grid>
-    <ion-row>
-      <ion-col *ngFor="let player of myLobby?.players" sizeLg="3" sizeMd="4" sizeSm="6">
-        <ion-item style="margin: 5px">
+  <div class="lobbyTitle">
+    <ion-label>
+      <h1>Lobby: {{myLobby?.lobbyName}}</h1>
+    </ion-label>
+    <ion-button style="justify-content: center;" (click)="startGame()" *ngIf="isAdmin">
+      Start a new game
+    </ion-button>
+  </div>
 
-          <ion-fab-button>
-            <ion-img [src]="player.userImageLink"></ion-img>
-          </ion-fab-button>
+  <div id="leftPart">
+    <h4 class="listPlayers">
+      List of players
+    </h4>
+    <ion-item *ngFor="let player of myLobby?.players" style="margin: 5px; width: 100%; margin-top: 10px;">
+      <ion-thumbnail style="left: 5px;">
+        <ion-img [src]="player.userImageLink"></ion-img>
+      </ion-thumbnail>
+      <ion-label>
+        {{player.username}}
+      </ion-label>
 
-          <ion-label style="margin-left: 15px;">
-            {{player.username}}
-          </ion-label>
+      <ion-fab *ngIf="isAdmin" vertical="top" horizontal="end">
+        <ion-fab-button style="width: 20px; height: 20px" size="small" color="danger"
+          (click)="kickPlayer(player.userUUID)" [disabled]="me.userUUID === player.userUUID">
+          <ion-icon name="trash"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
+    </ion-item>
 
-          <ion-button *ngIf="isAdmin" (click)="kickPlayer(player.userUUID)"
-            [disabled]="me.userUUID === player.userUUID">
-            Kick
-          </ion-button>
-        </ion-item>
-      </ion-col>
-    </ion-row>
-  </ion-grid>
 
-  <ion-button (click)="startGame()" *ngIf="isAdmin">
-    Start a new game
-  </ion-button>
+    <ion-button id="newGbutton" [disabled]="mojRed === false" (click)="takeCardManually()">
+      Take one
+    </ion-button>
+  </div>
 
-  <!-- <ion-img src="assets/images/black_+4.JPG" style = "width: 100px;">
-    </ion-img> -->
-  <ion-card id="game">
-    hello
-    <ion-grid>
-      <ion-row>
-        <ion-col size="auto" *ngFor="let card of MyCardsPlayable; let i = index">
-          <ion-item style="height: 200px; width: 200px">
-            <ion-img (click)="cardClick(i)" [src]='"../../../assets/images/" + card.color + "_" + card.value + ".JPG"'
-              style="width: 100px;"></ion-img>
-          </ion-item>
+
+  <div id="middlePart">
+    <div style="display: flex; justify-content: space-around; margin: 30px;">
+      <ion-img [src]='"../../../assets/images/" + mainCard?.color + "_" + mainCard?.value + ".JPG"'
+        style="width:10vw; justify-content: center;">
+      </ion-img>
+    </div>
+
+    <ion-grid id="game">
+      <ion-row style="width:60vw">
+        <ion-col size="1" *ngFor="let card of MyCardsPlayable; let i = index">
+          <ion-img style="height: 200px;" (click)="cardClick(i)"
+            [src]='"../../../assets/images/" + card.color + "_" + card.value + ".JPG"'>
+          </ion-img>
         </ion-col>
       </ion-row>
     </ion-grid>
-  </ion-card>
 
-  <ion-button [disabled] = "mojRed === false" (click)="takeCardManually()"> 
-    Take one card
-  </ion-button>
 
-  <ion-card>
-    <ion-grid>
-      <ion-row>
-        <ion-col size="auto" *ngFor="let card of myCards">
-          <ion-item>
-            <ion-img [src]='"../../../assets/images/" + card.color + "_" + card.value + ".JPG"' style="width: 50px;">
-            </ion-img>
-          </ion-item>
-        </ion-col>
-      </ion-row>
-    </ion-grid>
-  </ion-card>
+    <div id="allCards">
+      <div style="width:60vw" *ngFor="let card of myCards">
+        <ion-img class="avCards" class="allCardsImgs"
+          [src]='"../../../assets/images/" + card.color + "_" + card.value + ".JPG"'>
+        </ion-img>
+      </div>
+    </div>
+  </div>
+
+  <div id="rightPart">
+    <h2 class="chatTitle">
+      Chat
+    </h2>
+    <ion-item>
+      <ion-input (keyup.enter)="onEnter()" type="text" [(ngModel)]="newMessage" placeholder="Enter your message">
+      </ion-input>
+    </ion-item>
+
+    <div id="messages">
+      <app-chat-view></app-chat-view>
+    </div>
+
+
+  </div>
+
 </ion-content>

@@ -89,7 +89,7 @@ export class UserService {
             failedLogin = true;
           }
 
-        }, 400);
+        }, 200);
         await this.timeout(600);
 
         if (JSON.parse(JSON.stringify(failedLogin)) === true) {

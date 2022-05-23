@@ -25,6 +25,8 @@ export class LobbyPage implements OnInit {
   MyCardsPlayable: Card[] = [];
   MyAvailableMoves: AvailableMoves;
 
+  mainCard: Card;
+
   isAdmin: boolean;
 
   newMessage: string;
@@ -32,6 +34,7 @@ export class LobbyPage implements OnInit {
   dispMyCards: string[] = [];
 
   mojRed: boolean;
+  chatMessages: string[] = [];
 
   constructor(
     private dbService: DbService,
@@ -112,6 +115,17 @@ export class LobbyPage implements OnInit {
         console.log("my Hand");
         console.log(myHand);
         this.myCards = myHand.cards;
+
+        let lastCard: Card;
+
+        for (let i = this.myGame.moves?.length - 1; i >= 0; i--) {
+          lastCard = this.myGame.moves[i].card;
+          if (lastCard?.value !== "theNothing")
+            break;
+        }
+        this.mainCard = lastCard;
+
+
         if (this.mojRed === true) {
           let stackedCards: Card[] = [];
           for (let move of this.myGame.moves) {
@@ -146,14 +160,12 @@ export class LobbyPage implements OnInit {
     });
   }
 
-  onEnter() {
-    /*console.log(this.newMessage);
-    let message: Message = <Message>{};
-    message.text = this.newMessage;
-    message.userUUID = this.userService.user.value.userUUID;
-    message.timeStamp = new Date().toISOString();
-    this.databaseService.sendMessage(message, this.myLobby.lobbyUUID);*/
-    this.newMessage = "";
+  async onEnter() {
+    console.log(this.newMessage);
+    if (this.newMessage.length > 3) {
+      await this.dbService.sendMessage(this.me, this.newMessage, this.myLobby.chatUUID);
+      this.newMessage = "";
+    }
   }
 
   async kickPlayer(userUUID: string) {
@@ -192,7 +204,7 @@ export class LobbyPage implements OnInit {
 
   async takeCardManually() {
     console.log("alooooooo");
-    
+
     if (this.mojRed === true) {
       console.log("taking ONE card");
 
@@ -201,3 +213,5 @@ export class LobbyPage implements OnInit {
     }
   }
 }
+
+

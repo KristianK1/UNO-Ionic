@@ -1,4 +1,101 @@
-.card{
+.card {
     width: 100px;
     height: 100px;
+}
+
+.lobbyTitle {
+    height: 5vh;
+    width: 100%;
+    text-align: center;
+}
+
+.listPlayers {
+    margin: auto;
+
+    margin-top: 20px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+#newGbutton {
+    position: absolute;
+    width: 10vw;
+    margin: 30px;
+}
+
+#leftPart {
+    width: 15vw;
+    float: left;
+    top: 0;
+    height: 90vh;
+
+}
+
+#middlePart {
+    min-width: 60vw;
+    max-width: 60vw;
+    float: left;
+    height: 90vh;
+}
+
+#rightPart {
+    position: absolute;
+    width: 24vw;
+    float: right;
+    right: 0;
+}
+
+.chatTitle {
+    text-align: center;
+    height: 3vh;
+}
+
+#messages {
+    overflow-y: hidden;
+    overflow-x: visible;
+    height: 80vh;
+}
+
+#messageInput {
+    position: absolute;
+    bottom: 0%;
+    height: 5vh;
+    width: 100%;
+}
+
+
+#game {
+    position: absolute;
+    bottom: 180px;
+    max-width: 60vw;
+    min-width: 60vw;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.avCards {
+    max-width: 180px;
+    min-width: 180px;
+}
+
+
+#allCards {
+    position: absolute;
+    bottom: 0;
+    max-width: 60vw;
+    width: 50vw;
+    display: flex;
+    flex-direction: row;
+    flex-grow: -5;
+    justify-content: center;
+}
+
+.allCardsImgs {
+    // position: relative;
+    // margin-left: auto;
+    // margin-right: auto;
+    max-width: 100px;
+    min-width: 100px;
+    margin-right: -100px;
 }

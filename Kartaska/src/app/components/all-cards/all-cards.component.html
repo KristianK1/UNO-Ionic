@@ -1,0 +1,13 @@
+<div class="allCardsComp">
+  <div class="title">
+    <h4>
+      Sve karte
+    </h4>
+  </div>
+  <div class="allCards">
+    <div *ngFor="let card of allMyCards">
+      <ion-img class="avCards" [src]='"../../../assets/images/" + card.color + "_" + card.value + ".JPG"'>
+      </ion-img>
+    </div>
+  </div>
+</div>

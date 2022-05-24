@@ -41,25 +41,6 @@
         style="width:10vw; justify-content: center;">
       </ion-img>
     </div>
-
-    <ion-grid id="game">
-      <ion-row style="width:60vw">
-        <ion-col size="1" *ngFor="let card of MyCardsPlayable; let i = index">
-          <ion-img style="height: 200px;" (click)="cardClick(i)"
-            [src]='"../../../assets/images/" + card.color + "_" + card.value + ".JPG"'>
-          </ion-img>
-        </ion-col>
-      </ion-row>
-    </ion-grid>
-
-
-    <div id="allCards">
-      <div style="width:60vw" *ngFor="let card of myCards">
-        <ion-img class="avCards" class="allCardsImgs"
-          [src]='"../../../assets/images/" + card.color + "_" + card.value + ".JPG"'>
-        </ion-img>
-      </div>
-    </div>
   </div>
 
   <div id="rightPart">
@@ -79,3 +60,8 @@
   </div>
 
 </ion-content>
+
+<ion-footer>
+  <app-playable-cards [cards]="MyCardsPlayable" (cardClick)="cardClick($event)"></app-playable-cards>
+  <app-all-cards></app-all-cards>
+</ion-footer>

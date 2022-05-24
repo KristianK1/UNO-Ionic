@@ -176,7 +176,9 @@ export class LobbyPage implements OnInit {
     await this.lobbyService.createGame(this.dbService.myLobby.value.lobbyUUID);
   }
 
-  async cardClick(i: number) {
+  async cardClick(i: any) {
+    console.log(i);
+    
     //pokreni loading dok se ova funkcija izvrsava
     let card: Card = this.MyCardsPlayable[i];
     console.log(card);

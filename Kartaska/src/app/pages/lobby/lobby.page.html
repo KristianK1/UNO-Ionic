@@ -1,44 +1,20 @@
+<ion-header>
+  <app-player-list></app-player-list>
+</ion-header>
+
 <ion-content>
-  <div class="lobbyTitle">
-    <ion-label>
-      <h1>Lobby: {{myLobby?.lobbyName}}</h1>
-    </ion-label>
-    <ion-button style="justify-content: center;" (click)="startGame()" *ngIf="isAdmin">
-      Start a new game
-    </ion-button>
-  </div>
-
-  <div id="leftPart">
-    <h4 class="listPlayers">
-      List of players
-    </h4>
-    <ion-item *ngFor="let player of myLobby?.players" style="margin: 5px; width: 100%; margin-top: 10px;">
-      <ion-thumbnail style="left: 5px;">
-        <ion-img [src]="player.userImageLink"></ion-img>
-      </ion-thumbnail>
-      <ion-label>
-        {{player.username}}
-      </ion-label>
-
-      <ion-fab *ngIf="isAdmin" vertical="top" horizontal="end">
-        <ion-fab-button style="width: 20px; height: 20px" size="small" color="danger"
-          (click)="kickPlayer(player.userUUID)" [disabled]="me.userUUID === player.userUUID">
-          <ion-icon name="trash"></ion-icon>
-        </ion-fab-button>
-      </ion-fab>
-    </ion-item>
 
 
-    <ion-button id="newGbutton" [disabled]="mojRed === false" (click)="takeCardManually()">
-      Take one
-    </ion-button>
-  </div>
+
+
+
+
 
 
   <div id="middlePart">
-    <div style="display: flex; justify-content: space-around; margin: 30px;">
+    <div *ngIf="!!myGame" style="display: flex; justify-content: space-around; margin-top: 10vh;">
       <ion-img [src]='"../../../assets/images/" + mainCard?.color + "_" + mainCard?.value + ".JPG"'
-        style="width:10vw; justify-content: center;">
+        style="width:30vw; max-height: 40vh; justify-content: center;">
       </ion-img>
     </div>
   </div>
@@ -62,6 +38,10 @@
 </ion-content>
 
 <ion-footer>
-  <app-playable-cards [cards]="MyCardsPlayable" (cardClick)="cardClick($event)"></app-playable-cards>
-  <app-all-cards></app-all-cards>
+  <ion-button id="newGbutton" [disabled]="mojRed === false" (click)="takeCardManually()">
+    Take one
+  </ion-button>
+  <app-playable-cards *ngIf="MyCardsPlayable.length > 0" [cards]="MyCardsPlayable" (cardClick)="cardClick($event)">
+  </app-playable-cards>
+  <app-all-cards *ngIf="!!myGame"></app-all-cards>
 </ion-footer>

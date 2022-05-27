@@ -28,13 +28,12 @@ export class AppComponent {
     private platform: Platform,
     private userService: UserService,
     private changeDetector: ChangeDetectorRef,
-    private databaseService: DbService,
-    private router: Router,
-    private lobbyService: LobbyService,
+    private dbService: DbService,
+    public lobbyService: LobbyService,
   ) {
     this.appInit();
 
-    this.databaseService.myLobby.subscribe(rez => {
+    this.dbService.myLobby.subscribe(rez => {
       //TODO mozda napravit boolean myLobbyExists da se ovo ne trigera stalno
       console.log("app comp bool change");
       console.log(rez);
@@ -105,5 +104,14 @@ export class AppComponent {
 
   async leaveLobby() {
     this.lobbyService.leaveLobby();
+  }
+
+  startNewGame() {
+    this.closeMenu();
+    this.lobbyService.createGame(this.lobbyService.myLobby.lobbyUUID);
+  }
+
+  kickPlayer(userUUID: string) {
+    this.dbService.removePlayerFromLobby(this.lobbyService.myLobby.lobbyUUID, userUUID);
   }
 }

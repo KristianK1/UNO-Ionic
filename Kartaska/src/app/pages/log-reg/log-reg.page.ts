@@ -51,11 +51,12 @@ export class LogRegPage implements OnInit, OnDestroy {
           if (!!data) {
             let possibleUser: User = JSON.parse(data);
             console.log(possibleUser);
-
-            this.login(
-              possibleUser.username,
-              possibleUser.password
-            );
+            if (!this.userService.user.value) { //ako nisam ulogiran
+              this.login(
+                possibleUser.username,
+                possibleUser.password
+              );
+            }
           }
         } catch { }
       }

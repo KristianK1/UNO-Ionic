@@ -72,7 +72,7 @@ export class LobbyPage implements OnInit {
         let mojI: number;
         let zadnjiIgraoUUID: string = this.myGame.moves[this.myGame.moves.length - 1].userUUID;
         let zadnjiI: number;
-        let playerNumber = this.myLobby.players.length;
+        let playerNumber = this.myLobby?.players?.length || 0;
         for (let i = 0; i < playerNumber; i++) {
           if (this.me.userUUID === this.myLobby.players[i].userUUID) {
             mojI = i;
@@ -111,7 +111,7 @@ export class LobbyPage implements OnInit {
 
 
 
-        let myHand: Hand = rez.playerCards.find(o => o.userUUID === this.me.userUUID);
+        let myHand: Hand = rez.playerCards.find(o => o.user.userUUID === this.me.userUUID);
         console.log("my Hand");
         console.log(myHand);
         this.myCards = myHand.cards;

@@ -1,0 +1,15 @@
+<div class="allPlayers">
+  <ion-item *ngFor="let player of display" class="avCards">
+    <ion-thumbnail class="thumb">
+      <ion-img class="pImage" [src]='player.user.userImageLink'>
+      </ion-img>
+    </ion-thumbnail>
+    <span>
+      {{player.user.username}}
+    </span>
+    
+    &nbsp;&nbsp;&nbsp;
+    <span *ngIf="player.cards?.length > 0"> ({{player.cards?.length}} cards)</span>
+
+  </ion-item>
+</div>

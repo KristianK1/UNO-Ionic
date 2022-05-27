@@ -1,0 +1,24 @@
+
+.avCards {
+    height: 5vh;
+    min-width: 200px;
+
+}
+
+.allPlayers {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content:left;
+    overflow: scroll;
+}
+
+
+.thumb{
+    height: 3vh;
+    width: 3vh;
+}
+.pImage{
+    height: 3vh;
+    width: 3vh;
+}

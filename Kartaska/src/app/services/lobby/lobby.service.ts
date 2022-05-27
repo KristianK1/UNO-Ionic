@@ -19,6 +19,7 @@ import { Move } from 'src/app/interfaces/move';
 export class LobbyService {
 
   myLobby: Lobby;
+  isAdmin: boolean = false;
   constructor(
     private userService: UserService,
     private dbService: DbService,
@@ -29,6 +30,7 @@ export class LobbyService {
       if (!lobby) {
         this.myLobby = null;
         this.dbService.removeReferenceFromLobby();
+        this.dbService.removeRefrenceToMyMessages();
         this.router.navigate(["mainApp/home"]);
         return;
       }
@@ -41,8 +43,11 @@ export class LobbyService {
         this.router.navigate(["mainApp/home"]);
       }
 
+      this.isAdmin = meInLobby.userUUID === this.myLobby.adminUUID;
+
+
       if (!!this.myLobby.gameUUID) {
-        if(!!this.dbService.myGame.value){
+        if (!!this.dbService.myGame.value) {
           console.log("gameUUID u myLobbyu ali nista u myGame BehSub-u");
           this.dbService.createReferenceToGame(this.myLobby.gameUUID);
         }
@@ -59,7 +64,7 @@ export class LobbyService {
     this.dbService.myGame.subscribe(rez => {
       console.log(rez);
       if (!rez) this.dbService.removeReferenceToGame();
-      });
+    });
   }
 
   async joinLobby(lobbyUUID: string) {
@@ -102,48 +107,48 @@ export class LobbyService {
     newGame.direction = true;
     newGame.unUsedDeck = [];
     newGame.usedDeck = [];
-    
+
     for (let i = 0; i < 108; i++) {
       newGame.unUsedDeck.push(this.cardService.numToCard(i));
     }
     console.log("NE  promjesan deck");
-    
+
     console.log(newGame.unUsedDeck);
     newGame.unUsedDeck = this.cardService.randOrder(newGame.unUsedDeck);
     console.log("JEDANPUT promjesan deck");
-    
+
     console.log(newGame.unUsedDeck);
 
-    while(this.cardService.isValidStartCard(newGame.unUsedDeck[0]) === false){
+    while (this.cardService.isValidStartCard(newGame.unUsedDeck[0]) === false) {
       newGame.unUsedDeck = this.cardService.randOrder(newGame.unUsedDeck);
     }
     console.log("promjesan deck");
-    
+
     console.log(newGame.unUsedDeck);
-    
+
     newGame.playerCards = [];
 
     let firstMove: Move = <Move>{};
     firstMove.card = newGame.unUsedDeck[0];
     firstMove.userUUID = "";
-    
+
     newGame.usedDeck.push(newGame.unUsedDeck[0]);
-    newGame.unUsedDeck.splice(0,1);
+    newGame.unUsedDeck.splice(0, 1);
 
     console.log("midway");
-    
+
     newGame.moves.push(firstMove);
     for (let i = 0; i < this.dbService.myLobby.value.players.length; i++) {
       let hand: Hand = <Hand>{};
-      hand.userUUID = this.dbService.myLobby.value.players[i].userUUID;
+      hand.user = this.dbService.myLobby.value.players[i];
 
       let cards: Card[] = [];
       for (let j = 0; j < 7; j++) {
-        let takenCard = newGame.unUsedDeck[0]; 
+        let takenCard = newGame.unUsedDeck[0];
         console.log(takenCard);
-        
+
         cards.push(takenCard);
-        newGame.unUsedDeck.splice(0,1);
+        newGame.unUsedDeck.splice(0, 1);
         newGame.usedDeck.push(takenCard);
       }
       hand.cards = cards;

@@ -1,4 +1,4 @@
-<ion-card class="allCardsComp">
+<div class="allCardsComp">
   <div class="title">
     <h4>
       Dostupne karte
@@ -6,11 +6,9 @@
   </div>
   <div class="allCards">
     <div *ngFor="let card of cards; let i = index">
-      <ion-img 
-        (click)="click(i)" 
-        class="avCards" 
+      <ion-img (click)="click(i)" class="avCards"
         [src]='"../../../assets/images/" + card.color + "_" + card.value + ".JPG"'>
       </ion-img>
     </div>
   </div>
-</ion-card>
+</div>

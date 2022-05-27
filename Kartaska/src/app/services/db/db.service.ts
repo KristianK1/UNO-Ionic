@@ -92,7 +92,9 @@ export class DbService {
       }
     }
     await set(ref(this.database, 'lobbys/' + lobby.lobbyUUID), lobby);
+    await set(ref(this.database,'chats/' + lobby.chatUUID), []);
     this.createReferenceToLobby(lobby.lobbyUUID);
+    this.createRefrenceToMyMessages(lobby.chatUUID);
     return true;
   }
 
@@ -449,7 +451,7 @@ export class DbService {
     let myGame: Game = JSON.parse(JSON.stringify(this.myGame.value));
     let moves: Move[] = myGame.moves;
     let usedDeck: Card[] = myGame.usedDeck;
-    let myHand: Hand = JSON.parse(JSON.stringify(myGame.playerCards.find(o => o.userUUID == userUUID)));
+    let myHand: Hand = JSON.parse(JSON.stringify(myGame.playerCards.find(o => o.user.userUUID == userUUID)));
     for (let card of cards) {
       let move: Move = <Move>{};
       move.card = card;
@@ -468,7 +470,7 @@ export class DbService {
       }
       if (wasRemoved === false) console.log("\n\n\n\n\n\n\n\n\n\nWASNT REMOVED");
       for (let i = 0; i < myGame.playerCards.length; i++) {
-        if (myGame.playerCards[i].userUUID === userUUID) {
+        if (myGame.playerCards[i].user.userUUID === userUUID) {
           myGame.playerCards[i] = myHand;
         }
       }
@@ -510,7 +512,7 @@ export class DbService {
     myGame.unUsedDeck = unUsedCards;
 
     for (let i = 0; i < myGame.playerCards.length; i++) {
-      if (myGame.playerCards[i].userUUID === userUUID) {
+      if (myGame.playerCards[i].user.userUUID === userUUID) {
         myGame.playerCards[i].cards = myGame.playerCards[i].cards.concat(chosenCards);
         console.log(myGame.playerCards[i].cards);
 
@@ -565,6 +567,8 @@ export class DbService {
       this.refToMyMessages();
       this.refToMyMessages = undefined;
     }
+
+    this.myMessages.next(null);
   }
 
 

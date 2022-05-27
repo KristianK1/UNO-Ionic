@@ -1,6 +1,7 @@
 import { Card } from "./card";
+import { User } from "./user";
 
 export interface Hand {
-    userUUID: string,
     cards: Card[],
+    user: User,
 }

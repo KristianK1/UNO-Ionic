@@ -1,7 +1,7 @@
 a
 
 <ion-app>
-  <ion-menu [disabled]="!logiran" side="end" menuId="first" contentId="main">
+  <ion-menu [disabled]="!logiran" side="end" menuId="first" contentId="main" type="overlay">
 
     <ion-header>
       <ion-toolbar>
@@ -40,6 +40,12 @@ a
           </ion-label>
         </ion-item>
 
+        <ion-item (click)="startNewGame()" *ngIf="lobbyService.isAdmin">
+          <ion-label>
+            Start game
+          </ion-label>
+        </ion-item>
+
         <ion-item *ngIf="!allowHomePage" (click)="leaveLobby()">
           Izađi iz Lobby-a
         </ion-item>
@@ -56,7 +62,17 @@ a
           </ion-label>
         </ion-item>
 
+      </ion-list>
 
+      <ion-list *ngIf="this.lobbyService.isAdmin">
+        <ion-item *ngFor="let p of lobbyService.myLobby?.players">
+          <ion-label>
+            {{p.username}}
+          </ion-label>
+          <ion-button [disabled]="user?.userUUID === p.userUUID" (click)="kickPlayer(p.userUUID)">
+            Kick
+          </ion-button>
+        </ion-item>
       </ion-list>
     </ion-content>
   </ion-menu>

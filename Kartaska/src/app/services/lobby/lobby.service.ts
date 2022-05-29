@@ -86,14 +86,16 @@ export class LobbyService {
     else if (this.dbService.myLobby.value.adminUUID === this.userService.user.value.userUUID) {
       //ja sam admin
       this.dbService.alterLobbyAdmin(lobbyUUID, this.dbService.myLobby.value.players[1].userUUID);
+      await this.dbService.removePlayerFromLobby(
+        this.dbService.myLobby.value.lobbyUUID,
+        this.userService.user.value.userUUID
+      );
     }
 
-    await this.dbService.removePlayerFromLobby(
-      this.dbService.myLobby.value.lobbyUUID,
-      this.userService.user.value.userUUID
-    );
+
 
     this.dbService.removeRefrenceToMyMessages();
+    this.dbService.removeReferenceToGame();
     this.dbService.myLobby.next(null);
 
     this.router.navigate(["mainApp/home"]);

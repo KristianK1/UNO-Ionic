@@ -445,6 +445,7 @@ export class DbService {
       this.refToGame();
       this.refToGame = undefined;
     }
+    this.myGame.next(null);
   }
 
   async playCards(cards: Card[], gameUUID: string, userUUID: string) {
@@ -499,6 +500,10 @@ export class DbService {
 
   drawCards(n: number, gameUUID: string, userUUID: string): Game {
     console.log("vucem " + n);
+    
+    let myGameCopy = JSON.parse(JSON.stringify(this.myGame.value)); 
+    let recycledCards = myGameCopy.usedDeck;
+    let newUsedCards = [recycledCards.pop()];
 
     let unUsedCards: Card[] = this.myGame.value.unUsedDeck || [];
     unUsedCards = this.cardService.randOrder(unUsedCards);
@@ -508,17 +513,15 @@ export class DbService {
         chosenCards.push(unUsedCards.splice(0, 1)[0]);
       }
     }
-    let myGame = this.myGame.value;
-    myGame.unUsedDeck = unUsedCards;
+    myGameCopy.unUsedDeck = unUsedCards.concat(newUsedCards);
 
-    for (let i = 0; i < myGame.playerCards.length; i++) {
-      if (myGame.playerCards[i].user.userUUID === userUUID) {
-        myGame.playerCards[i].cards = myGame.playerCards[i].cards.concat(chosenCards);
-        console.log(myGame.playerCards[i].cards);
-
+    for (let i = 0; i < myGameCopy.playerCards.length; i++) {
+      if (myGameCopy.playerCards[i].user.userUUID === userUUID) {
+        myGameCopy.playerCards[i].cards = myGameCopy.playerCards[i].cards.concat(chosenCards);
+        console.log(myGameCopy.playerCards[i].cards);
       }
     }
-    return myGame;
+    return myGameCopy;
   }
 
   async setGame(game: Game) {

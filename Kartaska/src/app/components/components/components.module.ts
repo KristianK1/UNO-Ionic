@@ -5,6 +5,8 @@ import { ChatViewComponent } from 'src/app/components/chat-view/chat-view.compon
 import { AllCardsComponent } from '../all-cards/all-cards.component';
 import { PlayableCardsComponent } from '../playable-cards/playable-cards.component';
 import { PlayerListComponent } from '../player-list/player-list.component';
+import { AllCardsVerticalComponent } from '../all-cards-vertical/all-cards-vertical.component';
+import { PlayableCardsVerticalComponent } from '../playable-cards-vertical/playable-cards-vertical.component';
 
 
 @NgModule({
@@ -16,6 +18,8 @@ import { PlayerListComponent } from '../player-list/player-list.component';
     AllCardsComponent,
     PlayableCardsComponent,
     PlayerListComponent,
+    AllCardsVerticalComponent,
+    PlayableCardsVerticalComponent
   ],
 
   exports:[
@@ -23,6 +27,8 @@ import { PlayerListComponent } from '../player-list/player-list.component';
     AllCardsComponent,
     PlayableCardsComponent,
     PlayerListComponent,
+    AllCardsVerticalComponent,
+    PlayableCardsVerticalComponent,
   ],
   schemas:[
     CUSTOM_ELEMENTS_SCHEMA,

@@ -1,6 +1,16 @@
 #chatView{
     flex-direction: column-reverse;
-    overflow:auto;
+    overflow:hidden;
     display:flex;
-    flex-direction:column-reverse;
+}
+
+.chatTitle {
+    text-align: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.buttons{
+    width: 90%;
+    justify-content: center;
 }

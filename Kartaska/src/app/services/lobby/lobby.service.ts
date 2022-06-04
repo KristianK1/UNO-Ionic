@@ -45,7 +45,6 @@ export class LobbyService {
 
       this.isAdmin = meInLobby.userUUID === this.myLobby.adminUUID;
 
-
       if (!!this.myLobby.gameUUID) {
         if (!!this.dbService.myGame.value) {
           console.log("gameUUID u myLobbyu ali nista u myGame BehSub-u");
@@ -78,10 +77,14 @@ export class LobbyService {
 
   async leaveLobby() {
     let lobbyUUID = this.dbService.myLobby.value?.lobbyUUID;
-    if (!this.myLobby) return;
+    if (!this.myLobby) return
+
     if (this.dbService.myLobby.value.players.length === 1) {
       //ja sam zadnji igrac da ode
       this.dbService.removeLobby(lobbyUUID);
+      if(!!this.dbService.myLobby.value.gameUUID){
+        this.dbService.removeGame(this.dbService.myLobby.value.gameUUID);
+      }
     }
     else if (this.dbService.myLobby.value.adminUUID === this.userService.user.value.userUUID) {
       //ja sam admin
@@ -90,6 +93,8 @@ export class LobbyService {
         this.dbService.myLobby.value.lobbyUUID,
         this.userService.user.value.userUUID
       );
+      await this.dbService.removeMeFromGame(this.userService.user.value.userUUID, this.myLobby.gameUUID);
+
     }
 
 
@@ -108,7 +113,6 @@ export class LobbyService {
     newGame.moves = [];
     newGame.direction = true;
     newGame.unUsedDeck = [];
-    newGame.usedDeck = [];
 
     for (let i = 0; i < 108; i++) {
       newGame.unUsedDeck.push(this.cardService.numToCard(i));
@@ -134,7 +138,7 @@ export class LobbyService {
     firstMove.card = newGame.unUsedDeck[0];
     firstMove.userUUID = "";
 
-    newGame.usedDeck.push(newGame.unUsedDeck[0]);
+    // newGame.usedDeck.push(newGame.unUsedDeck[0]);
     newGame.unUsedDeck.splice(0, 1);
 
     console.log("midway");
@@ -151,7 +155,7 @@ export class LobbyService {
 
         cards.push(takenCard);
         newGame.unUsedDeck.splice(0, 1);
-        newGame.usedDeck.push(takenCard);
+        // newGame.usedDeck.push(takenCard);
       }
       hand.cards = cards;
       newGame.playerCards.push(hand)

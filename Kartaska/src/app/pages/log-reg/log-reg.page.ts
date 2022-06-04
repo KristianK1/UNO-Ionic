@@ -6,7 +6,7 @@ import { FireStorageService } from 'src/app/services/fireStorage/fire-storage.se
 import { StorageService } from 'src/app/services/storage/storage.service';
 import { UserService } from 'src/app/services/user/user.service';
 import { v4 as uuidv4 } from 'uuid';
-import { IonGrid, LoadingController } from '@ionic/angular';
+import { LoadingController } from '@ionic/angular';
 import { Router } from '@angular/router';
 
 @Component({
@@ -23,7 +23,6 @@ export class LogRegPage implements OnInit, OnDestroy {
   fileName: string;
   tempImg: string = "";
   tempImgPrefix: string; //TODO try to remove this variable
-  loadingContPopup: HTMLIonLoadingElement;
 
   constructor(
     private userService: UserService,
@@ -67,11 +66,14 @@ export class LogRegPage implements OnInit, OnDestroy {
     }, 500);
 
   }
-  ngOnDestroy() {
+  async ngOnDestroy() {
     console.log("destroy login page");
 
-    if (!!this.loadingContPopup)
-      this.loadingContPopup.dismiss();
+    try {
+      await this.loadingController.dismiss();
+      await this.loadingController.dismiss();
+    }
+    catch { }
   }
 
   changeMode(newMode: boolean) {
@@ -79,15 +81,16 @@ export class LogRegPage implements OnInit, OnDestroy {
   }
 
   async login(username?: string, password?: string) {
-    if (!!this.loadingContPopup) {
-      this.loadingContPopup.dismiss();
-      console.log("also wtf");
+    try {
+      await this.loadingController.dismiss();
+      await this.loadingController.dismiss();
     }
-    this.loadingContPopup = await this.loadingController.create({
+    catch { }
+
+    let loadingContPopup = await this.loadingController.create({
       message: 'Please wait...',
     });
-    await this.loadingContPopup.present();
-    console.log("PRESENTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT");
+    await loadingContPopup.present();
 
     //pocinje proces logiranja
     let loggedIn = await this.userService.login(username || this.username_login, password || this.password_login);
@@ -95,10 +98,12 @@ export class LogRegPage implements OnInit, OnDestroy {
     if (loggedIn) {
       this.router.navigate(["mainApp/home"]);
     }
-    //zavrsava proces logiranja
-    console.log("dismisssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss");
 
-    this.loadingContPopup.dismiss();
+    try {
+      await this.loadingController.dismiss();
+      await this.loadingController.dismiss();
+    }
+    catch { }
   }
 
   async insertImage() {

@@ -4,12 +4,11 @@ import { DbService } from 'src/app/services/db/db.service';
 import { UserService } from 'src/app/services/user/user.service';
 
 @Component({
-  selector: 'app-all-cards',
-  templateUrl: './all-cards.component.html',
-  styleUrls: ['./all-cards.component.scss'],
+  selector: 'app-all-cards-vertical',
+  templateUrl: './all-cards-vertical.component.html',
+  styleUrls: ['./all-cards-vertical.component.scss'],
 })
-export class AllCardsComponent implements OnInit {
-
+export class AllCardsVerticalComponent implements OnInit {
 
   allMyCards: Card[] = [];
   constructor(

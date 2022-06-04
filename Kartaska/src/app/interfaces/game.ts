@@ -8,7 +8,7 @@ export interface Game {
     gameStat: GameStat,
     gameUUID: string,
     unUsedDeck: Card[],
-    usedDeck: Card[],
+    // usedDeck: Card[],
     playerCards: Hand[],
     direction: boolean;
 }

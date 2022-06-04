@@ -1,19 +1,19 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { IonicModule } from '@ionic/angular';
 
-import { PlayerKickingComponent } from './player-kicking.component';
+import { AllCardsVerticalComponent } from './all-cards-vertical.component';
 
-describe('PlayerKickingComponent', () => {
-  let component: PlayerKickingComponent;
-  let fixture: ComponentFixture<PlayerKickingComponent>;
+describe('AllCardsVerticalComponent', () => {
+  let component: AllCardsVerticalComponent;
+  let fixture: ComponentFixture<AllCardsVerticalComponent>;
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ PlayerKickingComponent ],
+      declarations: [ AllCardsVerticalComponent ],
       imports: [IonicModule.forRoot()]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(PlayerKickingComponent);
+    fixture = TestBed.createComponent(AllCardsVerticalComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   }));

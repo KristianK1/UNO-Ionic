@@ -15,15 +15,9 @@ export class PlayableCardsComponent implements OnInit {
   @Output() cardClick = new EventEmitter();
   constructor() {}
 
-  ngOnInit() {
+  ngOnInit() {}
 
-    
-  }
-
-
-  async click(i: number) {
-    console.log("JOOOOOOOOOOOOOOOOOOOOOOOOOOOO" + i);
-    
+  async click(i: number) { 
     this.cardClick.emit(i);
   }
 

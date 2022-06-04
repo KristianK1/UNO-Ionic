@@ -14,6 +14,7 @@ import { CardService } from '../card/card.service';
 import { Card } from 'src/app/interfaces/card';
 import { Move } from 'src/app/interfaces/move';
 import { Message } from 'src/app/interfaces/message';
+import { IonGrid } from '@ionic/angular';
 
 @Injectable({
   providedIn: 'root'
@@ -83,6 +84,10 @@ export class DbService {
     await set(ref(this.database, "lobbys/" + lobbyUUID), null);
   }
 
+  async removeGame(gameUUID: string) {
+    await set(ref(this.database, "games/" + gameUUID), null);
+  }
+
 
   async insertNewLobby(lobby: Lobby) {
     for (let i = 0; i < this.allLobbys?.value?.length; i++) {
@@ -92,7 +97,7 @@ export class DbService {
       }
     }
     await set(ref(this.database, 'lobbys/' + lobby.lobbyUUID), lobby);
-    await set(ref(this.database,'chats/' + lobby.chatUUID), []);
+    await set(ref(this.database, 'chats/' + lobby.chatUUID), []);
     this.createReferenceToLobby(lobby.lobbyUUID);
     this.createRefrenceToMyMessages(lobby.chatUUID);
     return true;
@@ -230,7 +235,7 @@ export class DbService {
   }
 
   removeReferenceFromLobby() {
-    console.log("idem DESTORAYAT ref na SVE lobbye");
+    console.log("idem DESTORAYAT ref na moj lobbye");
     if (!!this.refToMyLobby) {
       this.refToMyLobby();
       this.refToMyLobby = undefined;
@@ -445,20 +450,20 @@ export class DbService {
       this.refToGame();
       this.refToGame = undefined;
     }
-    this.myGame.next(null);
   }
 
-  async playCards(cards: Card[], gameUUID: string, userUUID: string) {
+  async playCards(cards: Card[], moveUUID: string, gameUUID: string, userUUID: string) {
     let myGame: Game = JSON.parse(JSON.stringify(this.myGame.value));
     let moves: Move[] = myGame.moves;
-    let usedDeck: Card[] = myGame.usedDeck;
+    // let usedDeck: Card[] = myGame.usedDeck;
     let myHand: Hand = JSON.parse(JSON.stringify(myGame.playerCards.find(o => o.user.userUUID == userUUID)));
     for (let card of cards) {
       let move: Move = <Move>{};
       move.card = card;
       move.userUUID = userUUID;
+      move.moveUUID = moveUUID;
       moves.push(move);
-      usedDeck.push(card);
+      // usedDeck.push(card);
       let wasRemoved = false;
       for (let i = 0; i < myHand.cards.length; i++) {
         if (myHand.cards[i].color === card.color && myHand.cards[i].value === card.value) {
@@ -475,15 +480,21 @@ export class DbService {
           myGame.playerCards[i] = myHand;
         }
       }
-
     }
 
     console.log("playerCards nakon bacanja");
     console.log(JSON.parse(JSON.stringify(myGame.playerCards)));
-
+    for (let i = 0; i < myGame.playerCards.length; i++) {
+      if (myGame.playerCards[i].user.userUUID === userUUID) {
+        if (myGame.playerCards[i].cards.length === 0) {
+          console.log("osto sam bez karata");
+          myGame.playerCards.splice(i, 1);
+        }
+      }
+    }
 
     myGame.moves = moves;
-    myGame.usedDeck = usedDeck;
+    // myGame.usedDeck = usedDeck;
     console.log("myGame - playCards");
     console.log(myGame);
 
@@ -500,10 +511,44 @@ export class DbService {
 
   drawCards(n: number, gameUUID: string, userUUID: string): Game {
     console.log("vucem " + n);
-    
-    let myGameCopy = JSON.parse(JSON.stringify(this.myGame.value)); 
-    let recycledCards = myGameCopy.usedDeck;
-    let newUsedCards = [recycledCards.pop()];
+
+    let myGameCopy: Game = JSON.parse(JSON.stringify(this.myGame.value));
+    let recycledMoves = myGameCopy.moves;
+    let recCards: Card[] = []
+
+    let N = 0;
+    if (recycledMoves[recycledMoves.length - 1].card.value === "+4") {
+      for (let i = recycledMoves.length - 1; i >= 0; i--) {
+        if (recycledMoves[i].card.value === "+4") N++;
+        else break;
+      }
+    }
+    else if (recycledMoves[recycledMoves.length - 1].card.value === "+2") {
+      for (let i = recycledMoves.length - 1; i >= 0; i--) {
+        if (recycledMoves[i].card.value === "+2") N++;
+        else break;
+      }
+    }
+    else if (recycledMoves[recycledMoves.length - 1].card.value === "theNothing") {
+      N++; //jer eto
+      for (let i = recycledMoves.length - 1; i >= 0; i--) {
+        if (recycledMoves[i].card.value === "theNothing") N++;
+        else break;
+      }
+    }
+    else {
+      N = 2;
+    }
+
+    for (let i = 0; i < recycledMoves.length - N; i++) {
+      let card = recycledMoves[i].card;
+      if (card.value !== "theNothing") recCards.push(card);
+    }
+    for (let i = 0; i < recycledMoves.length - N; i++) {
+      myGameCopy.moves.splice(0, 1);
+    }
+
+    //if (lastCard.value)
 
     let unUsedCards: Card[] = this.myGame.value.unUsedDeck || [];
     unUsedCards = this.cardService.randOrder(unUsedCards);
@@ -513,7 +558,7 @@ export class DbService {
         chosenCards.push(unUsedCards.splice(0, 1)[0]);
       }
     }
-    myGameCopy.unUsedDeck = unUsedCards.concat(newUsedCards);
+    myGameCopy.unUsedDeck = unUsedCards.concat(recCards);
 
     for (let i = 0; i < myGameCopy.playerCards.length; i++) {
       if (myGameCopy.playerCards[i].user.userUUID === userUUID) {
@@ -546,10 +591,10 @@ export class DbService {
             for (let i: number = 0; i < keys.length; i++) {
               messages.push(messData[keys[i]]);
             }
-            
+
             console.log(JSON.parse(JSON.stringify(messages)));
-            
-            messages = messages.sort((a,b) => (b.timeStamp < a.timeStamp)? -1:1);
+
+            messages = messages.sort((a, b) => (b.timeStamp < a.timeStamp) ? -1 : 1);
             this.myMessages.next(messages);
           }
         },
@@ -576,12 +621,18 @@ export class DbService {
 
 
   async sendMessage(user: User, message: string, chatUUID: string) {
-    let newMessage: Message = <Message>{};
-    newMessage.text = message;
-    newMessage.userUUID = user?.userUUID || "";
-    newMessage.userName = user?.username || "System"
-    newMessage.timeStamp = Date.now();
-    await set(ref(this.database, "chats/" + chatUUID + "/" + uuidv4()), newMessage);
+    let newMessageQ: Message = <Message>{};
+    newMessageQ.text = message;
+    newMessageQ.userUUID = user?.userUUID || "";
+    newMessageQ.userName = user?.username || "System"
+    newMessageQ.timeStamp = Date.now();
+    await set(ref(this.database, "chats/" + chatUUID + "/" + uuidv4()), newMessageQ);
+  }
+
+  async removeMeFromGame(userUUID: string, gameUUID: string) {
+    let myGameCopyy: Game = JSON.parse(JSON.stringify(this.myGame.value));
+    myGameCopyy.playerCards.filter(o => o.user.userUUID !== userUUID);
+    await this.setGame(myGameCopyy);
   }
 
 }

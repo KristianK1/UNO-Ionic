@@ -1,87 +1,87 @@
-.card {
-    width: 100px;
-    height: 100px;
+
+
+#topPart {
+    top: 0%;
+    height: 10vh;
 }
 
-.lobbyTitle {
-    height: 5vh;
-    width: 100%;
-    text-align: center;
-}
-
-.listPlayers {
-    margin: auto;
-
-    margin-top: 20px;
-    margin-bottom: 20px;
-    text-align: center;
-}
-
-#newGbutton {
-    position: absolute;
-    width: 10vw;
-    margin: 30px;
-}
-
-#leftPart {
-    width: 15vw;
-    float: left;
-    top: 0;
-    height: 90vh;
-
-}
 
 #middlePart {
-    min-width: 60vw;
-    max-width: 60vw;
+    width: 50vw;
     float: left;
-    height: 90vh;
+    height: 55vh;
+    top: 20%;
 }
 
 #rightPart {
     position: absolute;
     width: 50vw;
-    max-width: 500px;
     float: right;
     right: 0;
+    height: 55vh;
+    top: 10%;
+    overflow: hidden;
 }
 
-.chatTitle {
-    text-align: center;
-    height: 3vh;
+
+
+#bottom1 {
+    height: 20vh;
+    max-height: 20vh;
+    min-height: 20vh;
+    width: 100vw;
+    bottom: 15%;
+    top: 65%;
 }
 
-#messages {
-    overflow-y: hidden;
-    overflow-x: visible;
-    height: 80vh;
-}
-
-#messageInput {
-    position: absolute;
+#bottom2 {
+    height: 15vh;
+    width: 100vw;
     bottom: 0%;
-    height: 5vh;
-    width: 100%;
 }
 
 
-#game {
+#topDesktop {
     position: absolute;
-    bottom: 180px;
-    max-width: 60vw;
-    min-width: 60vw;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
+    top: 0%;
+    height: 10vh;
+    width: 100vw;
 }
 
+#left1 {
+    position: absolute;
+    float: left;
+    left: 0%;
+    bottom: 0;
+    height: 90vh;
+    width: 15vh;
+    overflow: hidden;
+}
 
+#left2 {
+    float: left;
+    position: absolute;
+    left: 15vh;
+    bottom: 0;
+    height: 90vh;
+    width: 20vh;
+    overflow: hidden;
+}
 
-.allCardsPage {
+#middleDesktop {
     position: absolute;
     bottom: 0;
-    width: 100%;
+    left: 35vh;
+    height: 90vh;
+    width: 35vw;
+    overflow: hidden;
 }
-.allCardsPage {
-    width: 100%;
+
+#rightDesktop {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 30vw;
+    height: 90vh;
+    overflow: hidden;
 }

@@ -1,9 +1,54 @@
+<div>
+  <ion-grid>
+    <ion-row>
+      <ion-col size="6">
+        <ion-button class="buttons" (click)="takeCard_click()">
+          TAKE CARD(s)
+        </ion-button>
+      </ion-col>
+
+      <ion-col size="6">
+        <ion-button class="buttons" (click)="skip_click()">
+          SKIP
+        </ion-button>
+      </ion-col>
+    </ion-row>
+
+
+    <ion-row>
+      <ion-col size="6">
+        <ion-button class="buttons">
+          UNO
+        </ion-button>
+      </ion-col>
+
+      <ion-col size="6">
+        <ion-item *ngIf="!!mojRed">
+          Moj red
+        </ion-item>
+        <ion-item *ngIf="!mojRed">
+          Nije moj red
+        </ion-item>
+      </ion-col>
+    </ion-row>
+
+  </ion-grid>
+</div>
+
+<span class="chatTitle">
+  Chat
+</span>
+
+<ion-item>
+  <ion-input (keyup.enter)="onEnter()" type="text" (input)='onInputTime($event)'
+    placeholder="Enter your message">
+  </ion-input>
+</ion-item>
+
 <ion-grid id="chatView">
   <ion-row>
     <ion-col *ngFor="let item of chatMessages" size="12">
-      <h5>
-        <b>{{item.userName}}</b>: {{item.text}}
-      </h5>
+      <b>{{item.userName}}</b>: {{item.text}}
     </ion-col>
   </ion-row>
 </ion-grid>

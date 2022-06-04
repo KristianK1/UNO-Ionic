@@ -85,6 +85,9 @@ export class DbService {
   }
 
   async removeGame(gameUUID: string) {
+    let myLobbyCopy = this.myLobby.value;
+    myLobbyCopy.gameUUID = undefined;
+    this.myLobby.next(myLobbyCopy);
     await set(ref(this.database, "games/" + gameUUID), null);
   }
 
@@ -419,8 +422,11 @@ export class DbService {
 
           const gameData = (snapshot.val());
 
+          console.log(gameData);
+          
           if (!gameData) {
             console.log("nema game-a");
+            this.myGame.next(null);
           }
           else {
             console.log("parsanje gameData (refToGame) u beh sub");

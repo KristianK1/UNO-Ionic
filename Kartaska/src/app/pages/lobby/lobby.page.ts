@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { LoadingController, Platform } from '@ionic/angular';
+import { LoadingController, ModalController, Platform } from '@ionic/angular';
 import { AvailableMoves } from 'src/app/interfaces/available-moves';
 import { Card } from 'src/app/interfaces/card';
 import { Game } from 'src/app/interfaces/game';
@@ -13,6 +13,8 @@ import { LobbyService } from 'src/app/services/lobby/lobby.service';
 import { UserService } from 'src/app/services/user/user.service';
 import { v4 as uuidv4 } from 'uuid';
 import { moveMessagePortToContext } from 'worker_threads';
+import { LogRegPage } from '../log-reg/log-reg.page';
+import { ColorChooserPage } from '../smallPages/color-chooser/color-chooser.page';
 
 @Component({
   selector: 'app-lobby',
@@ -48,25 +50,26 @@ export class LobbyPage implements OnInit {
     private cardService: CardService,
     private changeDetector: ChangeDetectorRef,
     private loadingController: LoadingController,
-    private platform: Platform
+    private platform: Platform,
+    private modalController: ModalController,
   ) { }
 
   async ngOnInit() {
     console.log("lobby on init");
-    
+
     await this.platform.ready();
-    
+
     this.isMobile = this.platform.is('mobileweb') || this.platform.is('mobile');
     this.mobileView = this.isMobile;
     console.log("platform lobby");
-    
+
     this.platform.resize.subscribe(rez => {
       console.log("platform sub");
-      
+
       if (this.isMobile === false) {
         this.mobileView = this.platform.width() < 800;
         console.log("mobilni prikaz ", this.mobileView);
-        
+
       }
     })
 
@@ -85,7 +88,6 @@ export class LobbyPage implements OnInit {
 
     this.dbService.myLobby.subscribe(rez => {
       this.myLobby = rez;
-      console.log("yo wtf");
       console.log(this.myLobby);
 
       if (!!this.myLobby) {
@@ -108,6 +110,7 @@ export class LobbyPage implements OnInit {
       }
       else {
         this.myGame = rez;
+        console.log(this.myGame);
 
         let mojI: number;
         let zadnjiIgraoUUID: string = this.myGame.moves[this.myGame.moves.length - 1].userUUID;
@@ -115,16 +118,22 @@ export class LobbyPage implements OnInit {
         let playerNumber = this.myGame.playerCards.length;
         if (playerNumber === 1) {
           console.log("ostao sam sasvim sam");
+          if (this.isAdmin === true) {
+            this.dbService.removeGame(this.myGame.gameUUID);
+            return;
+          }
+
         }
 
 
+        console.log("trazenje mojI");
+        console.log(this.myGame.playerCards);
+        console.log(this.me.userUUID);
+
+
+
         for (let i = 0; i < playerNumber; i++) {
-          /*if (this.me.userUUID === this.myLobby.players[i].userUUID) {
-            mojI = i;
-          }
-          if (zadnjiIgraoUUID === this.myLobby.players[i].userUUID) {
-            zadnjiI = i;
-          }*/
+
           if (this.me.userUUID === this.myGame.playerCards[i].user.userUUID) {
             mojI = i;
           }
@@ -150,6 +159,10 @@ export class LobbyPage implements OnInit {
 
         }
 
+        if (mojI == undefined) {
+          console.log("ja ne igram visegsfgs");
+          return false;
+        }
         console.log("mojI " + JSON.parse(JSON.stringify(mojI)));
         console.log("zadnjiI " + JSON.parse(JSON.stringify(zadnjiI)));
 
@@ -269,8 +282,30 @@ export class LobbyPage implements OnInit {
       return;
     }
     for (let card of cards) {
-      if (card.color === "black") card.preferedNextColor = "blue"; //TODO modal?
-      //ovo se mora pitati samo za "zadnju crnu kartu"
+      if (card.color === "black") {
+        card.preferedNextColor = "blue"; //TODO modal?
+
+        for (; ;) {
+          let modal = await this.modalController.create({
+            component: ColorChooserPage,
+          });
+          await modal.present();
+          await modal.onDidDismiss();
+          if(!!this.lobbyService.chosenColor){
+            if(this.lobbyService.chosenColor === "red")
+              card.preferedNextColor = "red";
+            else if(this.lobbyService.chosenColor === "green")
+              card.preferedNextColor = "green";
+            else if(this.lobbyService.chosenColor === "blue")
+              card.preferedNextColor = "blue";
+            else if(this.lobbyService.chosenColor === "yellow")
+              card.preferedNextColor = "yellow";
+
+            this.lobbyService.chosenColor = undefined;
+            break;
+          }
+        }
+      }
     }
     let moveUUID: string = uuidv4();
     await this.dbService.playCards(cards, moveUUID, this.myGame.gameUUID, this.me.userUUID);

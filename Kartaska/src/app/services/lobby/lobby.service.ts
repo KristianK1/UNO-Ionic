@@ -20,6 +20,9 @@ export class LobbyService {
 
   myLobby: Lobby;
   isAdmin: boolean = false;
+
+  chosenColor: string;
+
   constructor(
     private userService: UserService,
     private dbService: DbService,
@@ -58,11 +61,6 @@ export class LobbyService {
       else {
         console.log("ne igra se game");
       }
-    });
-
-    this.dbService.myGame.subscribe(rez => {
-      console.log(rez);
-      if (!rez) this.dbService.removeReferenceToGame();
     });
   }
 

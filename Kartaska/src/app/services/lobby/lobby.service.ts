@@ -12,6 +12,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { LogRegPage } from 'src/app/pages/log-reg/log-reg.page';
 import { Card } from 'src/app/interfaces/card';
 import { Move } from 'src/app/interfaces/move';
+import { AvailableMoves } from 'src/app/interfaces/available-moves';
 
 @Injectable({
   providedIn: 'root'
@@ -22,6 +23,8 @@ export class LobbyService {
   isAdmin: boolean = false;
 
   chosenColor: string;
+
+  MyAvailableMoves: AvailableMoves;
 
   constructor(
     private userService: UserService,

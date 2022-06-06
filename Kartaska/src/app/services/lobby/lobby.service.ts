@@ -40,10 +40,15 @@ export class LobbyService {
       this.myLobby = lobby;
 
       let meInLobby = this.myLobby.players.find(o => o.userUUID === this.userService.user.value.userUUID);
+      console.log("ovo sam ja u lobbyu");
+      console.log(meInLobby);
+
+
 
       if (!meInLobby) {
         this.dbService.removeReferenceFromLobby();
         this.router.navigate(["mainApp/home"]);
+        return;
       }
 
       this.isAdmin = meInLobby.userUUID === this.myLobby.adminUUID;
@@ -77,30 +82,36 @@ export class LobbyService {
     let lobbyUUID = this.dbService.myLobby.value?.lobbyUUID;
     if (!this.myLobby) return
 
-    if (this.dbService.myLobby.value.players.length === 1) {
-      //ja sam zadnji igrac da ode
-      this.dbService.removeLobby(lobbyUUID);
-      if(!!this.dbService.myLobby.value.gameUUID){
-        this.dbService.removeGame(this.dbService.myLobby.value.gameUUID);
-      }
-    }
-    else if (this.dbService.myLobby.value.adminUUID === this.userService.user.value.userUUID) {
+    if (
+      this.dbService.myLobby.value.adminUUID === this.userService.user.value.userUUID &&
+      this.dbService.myLobby.value.players.length > 1
+    ) {
       //ja sam admin
       this.dbService.alterLobbyAdmin(lobbyUUID, this.dbService.myLobby.value.players[1].userUUID);
-      await this.dbService.removePlayerFromLobby(
-        this.dbService.myLobby.value.lobbyUUID,
-        this.userService.user.value.userUUID
-      );
-      await this.dbService.removeMeFromGame(this.userService.user.value.userUUID, this.myLobby.gameUUID);
+    }
 
+    if (this.dbService.myLobby.value.players.length === 1) {
+      //ja sam zadnji igrac da ode
+      if (!!this.dbService.myLobby.value.gameUUID) {
+        await this.dbService.removeGame(this.dbService.myLobby.value.gameUUID);
+      }
+      await this.dbService.removeLobby(lobbyUUID);
+      return;
     }
 
 
+    await this.dbService.removePlayerFromLobby(
+      this.dbService.myLobby.value.lobbyUUID,
+      this.userService.user.value.userUUID
+    );
+    if (!!this.dbService.myGame.value)
+      await this.dbService.removeMeFromGame(this.userService.user.value.userUUID, this.myLobby.gameUUID);
+    try {
+      this.dbService.removeRefrenceToMyMessages();
+      this.dbService.removeReferenceToGame();
+      this.dbService.removePlayerFromLobby(this.myLobby.lobbyUUID, this.userService.user.value.userUUID);
 
-    this.dbService.removeRefrenceToMyMessages();
-    this.dbService.removeReferenceToGame();
-    this.dbService.myLobby.next(null);
-
+    } catch { }
     this.router.navigate(["mainApp/home"]);
   }
 
@@ -135,6 +146,7 @@ export class LobbyService {
     let firstMove: Move = <Move>{};
     firstMove.card = newGame.unUsedDeck[0];
     firstMove.userUUID = "";
+    firstMove.moveUUID = uuidv4();
 
     // newGame.usedDeck.push(newGame.unUsedDeck[0]);
     newGame.unUsedDeck.splice(0, 1);

@@ -16,21 +16,38 @@ export class AccountSettingsPage implements OnInit {
   name: string;
   imageLink: string;
 
+  showImg: boolean = true;
+
   constructor(
     private userService: UserService,
     private cameraService: CameraService,
     private dbService: DbService,
     private fireStorageService: FireStorageService,
     private changeDetector: ChangeDetectorRef,
-    private router: Router,
     private lobbyService: LobbyService,
   ) { }
 
-  ngOnInit() {
-    this.userService.user.subscribe(user => {
+  async ngOnInit() {
+    this.userService.user.subscribe(async user => {
+      if(!user) return;
       console.log(user);
       this.name = user?.username || "";
+      this.imageLink = "";
+      console.log("acc user sub");
+      
+      if (this.imageLink !== user.userImageLink) {
+        this.showImg = false;
+        this.imageLink = "";
+        console.log("start timeout");
+        
+        await this.timeout(100);
+        this.changeDetector.detectChanges();
+        await this.timeout(100);
+        
+        console.log("end timeout");
+      }
       this.imageLink = user?.userImageLink || "";
+      this.showImg = true;
       console.log("acc setting user update");
       this.changeDetector.detectChanges();
     })
@@ -41,7 +58,7 @@ export class AccountSettingsPage implements OnInit {
   async changePicture() {
     let img = await this.cameraService.takePhoto();
     try {
-      await this.fireStorageService.deleteImage(this.userService.user.value.userUUID);
+      await this.fireStorageService.deleteImage(this.userService.user.value.userImageLink);
     }
     catch (e) {
       console.log(e);
@@ -58,6 +75,10 @@ export class AccountSettingsPage implements OnInit {
     if (!!this.userService.user.value?.userImageLink)
       await this.fireStorageService.deleteImage(this.userService.user.value?.userImageLink);
     await this.userService.logout();
+  }
+
+  async timeout(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
 }

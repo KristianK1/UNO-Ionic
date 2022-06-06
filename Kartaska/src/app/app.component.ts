@@ -13,6 +13,8 @@ import { UserService } from './services/user/user.service';
 })
 export class AppComponent {
 
+  openLobbyDisabled: boolean;
+
   showMenu: boolean;
   showNewLobby: boolean;
   isMobile: boolean;
@@ -30,6 +32,7 @@ export class AppComponent {
     private changeDetector: ChangeDetectorRef,
     private dbService: DbService,
     public lobbyService: LobbyService,
+    private router: Router,
   ) {
     this.appInit();
 
@@ -62,6 +65,10 @@ export class AppComponent {
         this.showMenu = true;
         this.openMenu();
       }*/
+    });
+
+    this.dbService.myLobby.subscribe( rez => {
+      this.openLobbyDisabled = !!rez;
     });
 
     this.userService.user.subscribe(user => {
@@ -108,10 +115,21 @@ export class AppComponent {
 
   startNewGame() {
     this.closeMenu();
-    this.lobbyService.createGame(this.lobbyService.myLobby.lobbyUUID);
+    if (this.dbService.myLobby.value.players.length > 1) {
+      this.lobbyService.createGame(this.lobbyService.myLobby.lobbyUUID);
+    }
+    else{
+      //TODO alert
+    }
   }
 
   kickPlayer(userUUID: string) {
     this.dbService.removePlayerFromLobby(this.lobbyService.myLobby.lobbyUUID, userUUID);
+  }
+
+  async openSettings(){
+    await this.leaveLobby();
+    this.closeMenu();
+    this.router.navigate(["mainApp/account-settings"]);
   }
 }

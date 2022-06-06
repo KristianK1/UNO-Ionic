@@ -6,7 +6,7 @@
 
 <ion-content>
   <div class="page">
-    <ion-img [src]="imageLink" class="image"></ion-img>
+    <ion-img *ngIf="showImg" [src]="imageLink" class="image"></ion-img>
 
     <ion-item>
       <ion-label>

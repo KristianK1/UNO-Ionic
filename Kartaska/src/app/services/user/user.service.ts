@@ -40,10 +40,11 @@ export class UserService {
         console.log("ja u user servicu");
         console.log(this.user.value);
         console.log("ovo sam ja");
-        console.log(myself);
         if (!myself) {
-          //this.logout();
+          this.logout();
         }
+        this.user.next(myself);
+
       }
     });
   }
@@ -128,7 +129,7 @@ export class UserService {
 
   async loginReqFailed() {
     console.log("loq req failed userService");
-    await this.storageService.removeData(this.loginDataStorageKey);
+
     await this.dbService.removeRefrenceToMyUserLoginRequests();
     this.user.next(null);
     this.router.navigate(["log-reg"]);

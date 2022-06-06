@@ -197,7 +197,6 @@ export class DbService {
   }
 
   removeReferenceFromAllLobbys() {
-    console.log("idem DESTORAYAT ref na SVE lobbye");
     if (!!this.refToLobbys) {
       this.refToLobbys();
       this.refToLobbys = undefined;
@@ -222,6 +221,9 @@ export class DbService {
         if (!data.players) {
           data.players = [];
         }
+        
+
+
         try {
           this.myLobby.next(data);
         }
@@ -311,7 +313,8 @@ export class DbService {
     if (!lobby) return false;
     let players = lobby.players.filter(o => o.userUUID !== userUUID);
     await set(ref(this.database, "lobbys/" + lobbyUUID + "/players"), players);
-    return true
+    this.myLobby.next(null);
+    return true;
   }
 
   async createGame(newGame: Game, lobbyUUID: string) {
@@ -408,7 +411,7 @@ export class DbService {
   }
 
   async changeProfilePictureLink(user: User, link: string) {
-    await set(ref(this.database, "users/" + user.username + "/userImageLink"), link);
+    await set(ref(this.database, "users/" + user.userUUID + "/userImageLink"), link);
   }
 
   async createReferenceToGame(gameUUID: string) {
@@ -423,7 +426,7 @@ export class DbService {
           const gameData = (snapshot.val());
 
           console.log(gameData);
-          
+
           if (!gameData) {
             console.log("nema game-a");
             this.myGame.next(null);
@@ -510,15 +513,21 @@ export class DbService {
   async playNothingCard(card: Card, gameUUID: string, userUUID: string) {
     let myGame = this.myGame.value;
 
-    myGame.moves.push({ card: card, userUUID: userUUID });
+    myGame.moves.push({ card: card, userUUID: userUUID, moveUUID: uuidv4() });
 
     await set(ref(this.database, "games/" + gameUUID), myGame);
   }
 
   drawCards(n: number, gameUUID: string, userUUID: string): Game {
-    console.log("vucem " + n);
+    console.log("drawCards begin  - vucem " + n);
+
+
+
 
     let myGameCopy: Game = JSON.parse(JSON.stringify(this.myGame.value));
+    console.log("myGame copy");
+    console.log(JSON.parse(JSON.stringify(myGameCopy)));
+
     let recycledMoves = myGameCopy.moves;
     let recCards: Card[] = []
 
@@ -544,14 +553,25 @@ export class DbService {
     }
     else {
       N = 2;
+      console.log("default");
+
     }
 
-    for (let i = 0; i < recycledMoves.length - N; i++) {
+    console.log("mora se ostaviti zadnjih " + N);
+
+
+    for (let i = 0; i < recycledMoves.length - N - 1; i++) {
       let card = recycledMoves[i].card;
-      if (card.value !== "theNothing") recCards.push(card);
+      if (card.value !== "theNothing") {
+        let cardCopy: Card = <Card>{};
+        cardCopy.value = card.value;
+        cardCopy.color = card.color; //maknio sam preferedNextColor ako ga ima
+        recCards.push(card);
+      }
     }
     for (let i = 0; i < recycledMoves.length - N; i++) {
-      myGameCopy.moves.splice(0, 1);
+      console.log("obrisao");
+      console.log(myGameCopy.moves.splice(0, 1)[0]);
     }
 
     //if (lastCard.value)

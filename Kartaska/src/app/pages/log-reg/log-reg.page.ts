@@ -49,12 +49,15 @@ export class LogRegPage implements OnInit, OnDestroy {
           let data: string = await this.storageService.getData(this.userService.loginDataStorageKey);
           if (!!data) {
             let possibleUser: User = JSON.parse(data);
-            console.log(possibleUser);
-            if (!this.userService.user.value) { //ako nisam ulogiran
-              this.login(
-                possibleUser.username,
-                possibleUser.password
-              );
+            let xx = rez.find(o => o.userUUID === possibleUser.userUUID);
+            if (!!xx) {
+              console.log(possibleUser);
+              if (!this.userService.user.value) { //ako nisam ulogiran
+                this.login(
+                  possibleUser.username,
+                  possibleUser.password
+                );
+              }
             }
           }
         } catch { }

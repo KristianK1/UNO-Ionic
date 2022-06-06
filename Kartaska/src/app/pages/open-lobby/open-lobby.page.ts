@@ -15,7 +15,6 @@ import { v4 as uuidv4 } from 'uuid';
 export class OpenLobbyPage implements OnInit {
 
   lobbyName: string = "";
-  lobbyPassword: string = "";
 
   constructor(
     private dbService: DbService,
@@ -31,7 +30,6 @@ export class OpenLobbyPage implements OnInit {
     let newLobby: Lobby = <Lobby>{};
     newLobby.lobbyUUID = uuidv4();
     newLobby.lobbyName = this.lobbyName;
-    newLobby.lobbyPassword = this.lobbyPassword;
     newLobby.chatUUID = uuidv4();
     let me: User = this.userService.user.value;
     me = JSON.parse(JSON.stringify(me));
@@ -55,7 +53,6 @@ export class OpenLobbyPage implements OnInit {
     await this.dbService.insertNewLobby(newLobby);
 
     this.lobbyName = "";
-    this.lobbyPassword = "";
     console.log("navigiraj na lobby");
 
     this.router.navigate(['mainApp/lobby']);

@@ -17,8 +17,8 @@ import { Router } from '@angular/router';
 export class LogRegPage implements OnInit, OnDestroy {
 
   mode: boolean = true;
-  username_login: string = 'sviki';
-  password_login: string = 'sviki';
+  username_login: string = '';
+  password_login: string = '';
 
   fileName: string;
   tempImg: string = "";

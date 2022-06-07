@@ -32,8 +32,11 @@ export class AccountSettingsPage implements OnInit {
       if(!user) return;
       console.log(user);
       this.name = user?.username || "";
-      this.imageLink = "";
+
       console.log("acc user sub");
+      console.log(this.imageLink);
+      console.log(user.userImageLink);
+      
       
       if (this.imageLink !== user.userImageLink) {
         this.showImg = false;

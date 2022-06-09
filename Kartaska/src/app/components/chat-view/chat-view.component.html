@@ -16,15 +16,20 @@
 
     <ion-row>
       <ion-col size="12">
-        <ion-item *ngIf="mojRed == true" style="background-color: green;">
-          Moj red
-        </ion-item>
-        <ion-item *ngIf="mojRed == false" style="background-color: red;">
-          Nije moj red
-        </ion-item>
-        <ion-item *ngIf="mojRed != true && mojRed != false">
+        <ion-item *ngIf="!mojRed">
           Nema aktivne igre
         </ion-item>
+        <ion-item *ngIf="mojRed == 1" style="--background: green;">
+          Moj red
+        </ion-item>
+        <ion-item *ngIf="mojRed == 2" style="--background: red;">
+          Nije moj red
+        </ion-item>
+
+        <ion-item *ngIf="mojRed == 3" style="--background: cyan;">
+          Ne sudjelujete u igri
+        </ion-item>
+        
       </ion-col>
     </ion-row>
 
@@ -36,7 +41,7 @@
 </span>
 
 <ion-item>
-  <ion-input type="text" (keyup.enter)="onEnter()" [(ngModel)]="newMessageX" placeholder="Enter your message">
+  <ion-input type="text" (keyup.enter)="onEnter()" [(ngModel)]="newMessage" placeholder="Enter your message">
   </ion-input>
 </ion-item>
 

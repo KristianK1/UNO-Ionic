@@ -9,10 +9,12 @@
     margin-bottom: -3vw;
     margin-top: 0;
     width: 100%;
+
 }
 
 .allCards {
     bottom: 0;
+    max-height: 90vh;
     top: 50px;
     display: flex;
     flex-direction: column;

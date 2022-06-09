@@ -23,7 +23,6 @@ export class AllCardsComponent implements OnInit {
         let pCards = rez.playerCards;
         let myUUID = this.userService.user.value.userUUID;
         let myCardsTemp = pCards.find( o=> o.user.userUUID === myUUID)?.cards;
-        myCardsTemp = myCardsTemp?.sort((a,b) => a.value===b.value? 1: -1);
         this.allMyCards = myCardsTemp || [];
       }
       else{

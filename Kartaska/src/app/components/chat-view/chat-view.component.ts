@@ -14,11 +14,11 @@ export class ChatViewComponent implements OnInit {
 
   chatMessages: Message[] = [];
 
-  newMessage: string = "TEST   STSTS";
+  newMessage: string = "";
 
   @Output() takecard = new EventEmitter<void>();
   @Output() skip = new EventEmitter<void>();
-  @Input() mojRed: boolean;
+  @Input() mojRed: number;
 
   constructor(
     private dbService: DbService,
@@ -39,6 +39,7 @@ export class ChatViewComponent implements OnInit {
   async onEnter() {
     if (this.newMessage.length > 3) {
       await this.dbService.sendMessage(this.userService.user.value, this.newMessage, this.lobbyService.myLobby.chatUUID);
+      this.newMessage = "";
     }
   }
 

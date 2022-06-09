@@ -38,6 +38,8 @@ export class LobbyPage implements OnInit {
   dispMyCards: string[] = [];
 
   mojRed: boolean;
+  mojRedDisplay: number = 0;
+
   chatMessages: string[] = [];
 
   isMobile: boolean = false;
@@ -66,7 +68,7 @@ export class LobbyPage implements OnInit {
       console.log("platform sub");
 
       if (this.isMobile === false) {
-        this.mobileView = this.platform.width() < 800;
+        this.mobileView = this.platform.width() < 1000;
         console.log("mobilni prikaz ", this.mobileView);
 
       }
@@ -160,6 +162,7 @@ export class LobbyPage implements OnInit {
 
         if (mojI == undefined) {
           console.log("ja ne igram visegsfgs");
+          this.mojRedDisplay = 3;
           return false;
         }
         console.log("mojI " + JSON.parse(JSON.stringify(mojI)));
@@ -175,6 +178,7 @@ export class LobbyPage implements OnInit {
             console.log("mojRed SOL1");
 
             this.mojRed = false;
+
           }
         }
         else if (mojI - zadnjiI === 1 && this.myGame.direction === true) {
@@ -202,6 +206,11 @@ export class LobbyPage implements OnInit {
           this.mojRed = false;
         }
         console.log("moj Red = " + this.mojRed);
+
+        if (this.mojRed == false)
+          this.mojRedDisplay = 2;
+        if (this.mojRed == true)
+          this.mojRedDisplay = 1;
 
 
 
@@ -290,14 +299,14 @@ export class LobbyPage implements OnInit {
           });
           await modal.present();
           await modal.onDidDismiss();
-          if(!!this.lobbyService.chosenColor){
-            if(this.lobbyService.chosenColor === "red")
+          if (!!this.lobbyService.chosenColor) {
+            if (this.lobbyService.chosenColor === "red")
               card.preferedNextColor = "red";
-            else if(this.lobbyService.chosenColor === "green")
+            else if (this.lobbyService.chosenColor === "green")
               card.preferedNextColor = "green";
-            else if(this.lobbyService.chosenColor === "blue")
+            else if (this.lobbyService.chosenColor === "blue")
               card.preferedNextColor = "blue";
-            else if(this.lobbyService.chosenColor === "yellow")
+            else if (this.lobbyService.chosenColor === "yellow")
               card.preferedNextColor = "yellow";
 
             this.lobbyService.chosenColor = undefined;
@@ -338,7 +347,7 @@ export class LobbyPage implements OnInit {
       let lastMoveuuid: string = this.myGame.moves[this.myGame.moves.length - 1].moveUUID || "";
       if (lastMoveuuid !== this.cardTakenAtMoveUUID) {
         let NtoDraw = this.lobbyService.MyAvailableMoves.drawN;
-        if(!NtoDraw) NtoDraw = 1;
+        if (!NtoDraw) NtoDraw = 1;
         let tempGame: Game = this.dbService.drawCards(NtoDraw, this.myGame.gameUUID, this.me.userUUID);
         this.dbService.setGame(tempGame);
         this.cardTakenAtMoveUUID = lastMoveuuid;

@@ -11,7 +11,7 @@
 </div>
 
 <div id="rightPart" *ngIf="mobileView == true">
-  <app-chat-view [mojRed]="mojRed" (takecard)="takeCardManually($event)" (skip)="playNothing()"></app-chat-view>
+  <app-chat-view [mojRed]="mojRedDisplay" (takecard)="takeCardManually($event)" (skip)="playNothing()"></app-chat-view>
 </div>
 
 <div id="bottom1" *ngIf="mobileView == true">
@@ -54,8 +54,13 @@
 </div>
 
 <div id="middleDesktop" *ngIf="!mobileView">
+  <div *ngIf="!!myGame" style="display: flex; justify-content: space-around; margin-top: 10vh;">
+    <ion-img [src]='"../../../assets/images/" + mainCard?.color + "_" + mainCard?.value + ".JPG"'
+      style="width:30vw; max-height: 40vh; justify-content: center;">
+    </ion-img>
+  </div>
 </div>
 
 <div id="rightDesktop" *ngIf="!mobileView">
-  <app-chat-view [mojRed]="mojRed" (takecard)="takeCardManually($event)" (skip)="playNothing()"></app-chat-view>
+  <app-chat-view [mojRed]="mojRedDisplay" (takecard)="takeCardManually($event)" (skip)="playNothing()"></app-chat-view>
 </div>

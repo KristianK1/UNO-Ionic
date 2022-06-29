@@ -28,7 +28,7 @@ a
     <ion-content>
 
       <ion-list>
-        <ion-item (click)="closeMenu()" [routerLink]="['mainApp/open-lobby']">
+        <ion-item (click)="closeMenu()" [routerLink]="['mainApp/open-lobby']" [disabled]="openLobbyDisabled">
           <ion-label>
             Otvori novi Lobby
           </ion-label>
@@ -50,7 +50,7 @@ a
           Izađi iz Lobby-a
         </ion-item>
 
-        <ion-item (click)="closeMenu()" [routerLink]="['mainApp/account-settings']">
+        <ion-item (click)="openSettings()">
           <ion-label>
             Postavke računa
           </ion-label>

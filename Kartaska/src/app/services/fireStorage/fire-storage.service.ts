@@ -28,7 +28,10 @@ export class FireStorageService {
       return;
     }
 
+    console.log(url);
+    
     let pictureRef = this.angularFireStorage.storage.refFromURL(url);
+    
     try {
       await pictureRef.delete();
       console.log("uspjesno obrisano");

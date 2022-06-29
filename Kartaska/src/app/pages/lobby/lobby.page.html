@@ -1,47 +1,66 @@
-<ion-header>
+<div id="topPart" *ngIf="mobileView == true">
   <app-player-list></app-player-list>
-</ion-header>
+</div>
 
-<ion-content>
-
-
-
-
-
-
-
-
-  <div id="middlePart">
-    <div *ngIf="!!myGame" style="display: flex; justify-content: space-around; margin-top: 10vh;">
-      <ion-img [src]='"../../../assets/images/" + mainCard?.color + "_" + mainCard?.value + ".JPG"'
-        style="width:30vw; max-height: 40vh; justify-content: center;">
-      </ion-img>
-    </div>
+<div id="middlePart" *ngIf="mobileView == true">
+  <div *ngIf="!!myGame" style="display: flex; justify-content: space-around; margin-top: 10vh;">
+    <ion-img [src]='"../../../assets/images/" + mainCard?.color + "_" + mainCard?.value + ".JPG"'
+      style="width:30vw; max-height: 40vh; justify-content: center;">
+    </ion-img>
   </div>
+</div>
 
-  <div id="rightPart">
-    <h2 class="chatTitle">
-      Chat
-    </h2>
-    <ion-item>
-      <ion-input (keyup.enter)="onEnter()" type="text" [(ngModel)]="newMessage" placeholder="Enter your message">
-      </ion-input>
-    </ion-item>
+<div id="rightPart" *ngIf="mobileView == true">
+  <app-chat-view [mojRed]="mojRedDisplay" (takecard)="takeCardManually($event)" (skip)="playNothing()"></app-chat-view>
+</div>
 
-    <div id="messages">
-      <app-chat-view></app-chat-view>
-    </div>
-
-
-  </div>
-
-</ion-content>
-
-<ion-footer>
-  <ion-button id="newGbutton" [disabled]="mojRed === false" (click)="takeCardManually()">
-    Take one
-  </ion-button>
-  <app-playable-cards *ngIf="MyCardsPlayable.length > 0" [cards]="MyCardsPlayable" (cardClick)="cardClick($event)">
+<div id="bottom1" *ngIf="mobileView == true">
+  <app-playable-cards [cards]="MyCardsPlayable" (cardClick)="cardClick($event)">
   </app-playable-cards>
-  <app-all-cards *ngIf="!!myGame"></app-all-cards>
-</ion-footer>
+</div>
+
+<div id="bottom2" *ngIf="mobileView == true">
+  <app-all-cards></app-all-cards>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div id="topDesktop" *ngIf="!mobileView">
+  <app-player-list></app-player-list>
+</div>
+
+<div id="left1" *ngIf="!mobileView">
+  <app-all-cards-vertical>
+  </app-all-cards-vertical>
+</div>
+
+<div id="left2" *ngIf="!mobileView">
+  <app-playable-cards-vertical [cards]="MyCardsPlayable" (cardClick)="cardClick($event)"></app-playable-cards-vertical>
+</div>
+
+<div id="middleDesktop" *ngIf="!mobileView">
+  <div *ngIf="!!myGame" style="display: flex; justify-content: space-around; margin-top: 10vh;">
+    <ion-img [src]='"../../../assets/images/" + mainCard?.color + "_" + mainCard?.value + ".JPG"'
+      style="width:30vw; max-height: 40vh; justify-content: center;">
+    </ion-img>
+  </div>
+</div>
+
+<div id="rightDesktop" *ngIf="!mobileView">
+  <app-chat-view [mojRed]="mojRedDisplay" (takecard)="takeCardManually($event)" (skip)="playNothing()"></app-chat-view>
+</div>

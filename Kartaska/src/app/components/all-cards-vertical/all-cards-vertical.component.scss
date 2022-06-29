@@ -1,0 +1,22 @@
+.title{
+    width:100%;
+    text-align: center;
+    height: 50px;
+    padding: 10px;
+}
+
+.avCards {
+    margin-bottom: -3vw;
+    margin-top: 0;
+    width: 100%;
+
+}
+
+.allCards {
+    bottom: 0;
+    max-height: 90vh;
+    top: 50px;
+    display: flex;
+    flex-direction: column;
+    overflow: scroll;
+}

@@ -1,0 +1,18 @@
+.titleVertical{
+    width:100%;
+    justify-content: center;
+}
+
+.avCardsVertical {
+    margin-bottom: -3vw;
+    margin-top: 0;
+    width: 100%;
+}
+
+.allCardsVertical {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: scroll;
+    max-height: 90vh;
+}

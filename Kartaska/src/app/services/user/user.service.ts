@@ -5,6 +5,7 @@ import { User } from 'src/app/interfaces/user';
 import { StorageService } from '../storage/storage.service';
 import { v4 as uuidv4 } from 'uuid';
 import { DbService } from '../db/db.service';
+import { LoadingController } from '@ionic/angular';
 
 @Injectable({
   providedIn: 'root',
@@ -19,6 +20,7 @@ export class UserService {
     private dbService: DbService,
     private router: Router,
     private storageService: StorageService,
+    private loadingController: LoadingController,
   ) {
     this.dbService.loginReqFailed.subscribe(rez => {
       if (rez === true) {
@@ -37,11 +39,13 @@ export class UserService {
         );
         console.log("ja u user servicu");
         console.log(this.user.value);
+        this.dbService.myself = this.user.value;
         console.log("ovo sam ja");
-        console.log(myself);
         if (!myself) {
-          //this.logout();
+          this.logout();
         }
+        this.user.next(myself);
+
       }
     });
   }
@@ -99,11 +103,14 @@ export class UserService {
 
       console.log("ovdje sam");
 
-
-
       this.storageService.setData(this.loginDataStorageKey, JSON.stringify(find));
       this.dbService.createRefrenceToMyUserLoginRequests(find);
       this.user.next(find);
+      try {
+        await this.loadingController.dismiss();
+        await this.loadingController.dismiss();
+      }
+      catch { }
       return true;
 
 
@@ -123,7 +130,7 @@ export class UserService {
 
   async loginReqFailed() {
     console.log("loq req failed userService");
-    await this.storageService.removeData(this.loginDataStorageKey);
+
     await this.dbService.removeRefrenceToMyUserLoginRequests();
     this.user.next(null);
     this.router.navigate(["log-reg"]);

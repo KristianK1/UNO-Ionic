@@ -1,0 +1,14 @@
+<div class="allCardsCompVertical">
+  <div class="titleVertical">
+    <h4>
+      Dostupne karte
+    </h4>
+  </div>
+  <div class="allCardsVertical">
+    <div *ngFor="let card of cards; let i = index">
+      <ion-img (click)="click(i)" class="avCardsVertical"
+        [src]='"../../../assets/images/" + card.color + "_" + card.value + ".JPG"'>
+      </ion-img>
+    </div>
+  </div>
+</div>

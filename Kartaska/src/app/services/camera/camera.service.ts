@@ -12,7 +12,6 @@ export class CameraService {
   async takePhoto(): Promise<string> {
     let photo = await Camera.getPhoto({
       quality: 90,
-      allowEditing: true,
       resultType: CameraResultType.Base64,
       saveToGallery: false,
       width: 1000,

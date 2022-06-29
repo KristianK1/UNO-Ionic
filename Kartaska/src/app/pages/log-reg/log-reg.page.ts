@@ -6,7 +6,7 @@ import { FireStorageService } from 'src/app/services/fireStorage/fire-storage.se
 import { StorageService } from 'src/app/services/storage/storage.service';
 import { UserService } from 'src/app/services/user/user.service';
 import { v4 as uuidv4 } from 'uuid';
-import { IonGrid, LoadingController } from '@ionic/angular';
+import { LoadingController } from '@ionic/angular';
 import { Router } from '@angular/router';
 
 @Component({
@@ -16,14 +16,15 @@ import { Router } from '@angular/router';
 })
 export class LogRegPage implements OnInit, OnDestroy {
 
+  error_message_show = false;
+
   mode: boolean = true;
-  username_login: string = 'sviki';
-  password_login: string = 'sviki';
+  username_login: string = '';
+  password_login: string = '';
 
   fileName: string;
   tempImg: string = "";
   tempImgPrefix: string; //TODO try to remove this variable
-  loadingContPopup: HTMLIonLoadingElement;
 
   constructor(
     private userService: UserService,
@@ -50,12 +51,15 @@ export class LogRegPage implements OnInit, OnDestroy {
           let data: string = await this.storageService.getData(this.userService.loginDataStorageKey);
           if (!!data) {
             let possibleUser: User = JSON.parse(data);
-            console.log(possibleUser);
-            if (!this.userService.user.value) { //ako nisam ulogiran
-              this.login(
-                possibleUser.username,
-                possibleUser.password
-              );
+            let xx = rez.find(o => o.userUUID === possibleUser.userUUID);
+            if (!!xx) {
+              console.log(possibleUser);
+              if (!this.userService.user.value) { //ako nisam ulogiran
+                this.login(
+                  possibleUser.username,
+                  possibleUser.password
+                );
+              }
             }
           }
         } catch { }
@@ -67,11 +71,14 @@ export class LogRegPage implements OnInit, OnDestroy {
     }, 500);
 
   }
-  ngOnDestroy() {
+  async ngOnDestroy() {
     console.log("destroy login page");
 
-    if (!!this.loadingContPopup)
-      this.loadingContPopup.dismiss();
+    try {
+      await this.loadingController.dismiss();
+      await this.loadingController.dismiss();
+    }
+    catch { }
   }
 
   changeMode(newMode: boolean) {
@@ -79,26 +86,33 @@ export class LogRegPage implements OnInit, OnDestroy {
   }
 
   async login(username?: string, password?: string) {
-    if (!!this.loadingContPopup) {
-      this.loadingContPopup.dismiss();
-      console.log("also wtf");
+    try {
+      await this.loadingController.dismiss();
+      await this.loadingController.dismiss();
     }
-    this.loadingContPopup = await this.loadingController.create({
+    catch { }
+
+    let loadingContPopup = await this.loadingController.create({
       message: 'Please wait...',
     });
-    await this.loadingContPopup.present();
-    console.log("PRESENTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT");
+    await loadingContPopup.present();
 
     //pocinje proces logiranja
     let loggedIn = await this.userService.login(username || this.username_login, password || this.password_login);
     console.log("loggedIn = " + loggedIn);
     if (loggedIn) {
+      this.error_message_show = false;
       this.router.navigate(["mainApp/home"]);
     }
-    //zavrsava proces logiranja
-    console.log("dismisssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss");
+    else{
+      this.error_message_show = true;
+    }
 
-    this.loadingContPopup.dismiss();
+    try {
+      await this.loadingController.dismiss();
+      await this.loadingController.dismiss();
+    }
+    catch { }
   }
 
   async insertImage() {

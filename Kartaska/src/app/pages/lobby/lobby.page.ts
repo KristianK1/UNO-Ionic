@@ -1,15 +1,20 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { LoadingController, ModalController, Platform } from '@ionic/angular';
 import { AvailableMoves } from 'src/app/interfaces/available-moves';
 import { Card } from 'src/app/interfaces/card';
 import { Game } from 'src/app/interfaces/game';
 import { Hand } from 'src/app/interfaces/hand';
 import { Lobby } from 'src/app/interfaces/lobby';
+import { Move } from 'src/app/interfaces/move';
 import { User } from 'src/app/interfaces/user';
 import { CardService } from 'src/app/services/card/card.service';
 import { DbService } from 'src/app/services/db/db.service';
 import { LobbyService } from 'src/app/services/lobby/lobby.service';
 import { UserService } from 'src/app/services/user/user.service';
 import { v4 as uuidv4 } from 'uuid';
+import { moveMessagePortToContext } from 'worker_threads';
+import { LogRegPage } from '../log-reg/log-reg.page';
+import { ColorChooserPage } from '../smallPages/color-chooser/color-chooser.page';
 
 @Component({
   selector: 'app-lobby',
@@ -18,41 +23,72 @@ import { v4 as uuidv4 } from 'uuid';
 })
 export class LobbyPage implements OnInit {
 
+  cardTakenAtMoveUUID: string;
+
   myLobby: Lobby;
   myGame: Game;
   me: User;
   myCards: Card[] = [];
   MyCardsPlayable: Card[] = [];
-  MyAvailableMoves: AvailableMoves;
 
   mainCard: Card;
 
   isAdmin: boolean;
 
-  newMessage: string;
-
   dispMyCards: string[] = [];
 
   mojRed: boolean;
+  mojRedDisplay: number = 0;
+
   chatMessages: string[] = [];
 
+  isMobile: boolean = false;
+  mobileView: boolean = false;
   constructor(
     private dbService: DbService,
     private userService: UserService,
     private lobbyService: LobbyService,
     private cardService: CardService,
     private changeDetector: ChangeDetectorRef,
+    private loadingController: LoadingController,
+    private platform: Platform,
+    private modalController: ModalController,
   ) { }
 
-  ngOnInit() {
+  async ngOnInit() {
+    console.log("lobby on init");
 
-    this.userService.user.subscribe(rez => {
+    await this.platform.ready();
+
+    this.isMobile = this.platform.is('mobileweb') || this.platform.is('mobile');
+    this.mobileView = this.isMobile;
+    console.log("platform lobby");
+
+    this.platform.resize.subscribe(rez => {
+      console.log("platform sub");
+
+      if (this.isMobile === false) {
+        this.mobileView = this.platform.width() < 1000;
+        console.log("mobilni prikaz ", this.mobileView);
+
+      }
+    })
+
+
+    this.userService.user.subscribe(async rez => {
       this.me = rez;
+      if (!!this.me) {
+        try {
+          await this.loadingController.dismiss();
+        }
+        catch {
+
+        }
+      }
     });
 
     this.dbService.myLobby.subscribe(rez => {
       this.myLobby = rez;
-      console.log("yo wtf");
       console.log(this.myLobby);
 
       if (!!this.myLobby) {
@@ -60,27 +96,76 @@ export class LobbyPage implements OnInit {
         console.log(this.myLobby);
 
         this.isAdmin = this.myLobby.adminUUID === this.userService.user.value.userUUID;
-
       }
     });
 
     this.dbService.myGame.subscribe(async rez => {
-      if (!rez) this.myGame = null;
+      if (!rez) {
+        console.log("brisem sveeeeeeeeee");
+        this.mojRedDisplay = undefined;
+        this.myGame = null;
+        this.myCards = [];
+        this.lobbyService.MyAvailableMoves = undefined;
+        this.MyCardsPlayable = [];
+        this.mainCard = null;
+      }
       else {
         this.myGame = rez;
+        console.log(this.myGame);
 
         let mojI: number;
         let zadnjiIgraoUUID: string = this.myGame.moves[this.myGame.moves.length - 1].userUUID;
         let zadnjiI: number;
-        let playerNumber = this.myLobby?.players?.length || 0;
+        let playerNumber = this.myGame.playerCards.length;
+        if (playerNumber === 1) {
+          console.log("ostao sam sasvim sam");
+          if (this.isAdmin === true) {
+            this.dbService.removeGame(this.myGame.gameUUID);
+            return;
+          }
+
+        }
+
+
+        console.log("trazenje mojI");
+        console.log(this.myGame.playerCards);
+        console.log(this.me.userUUID);
+
+
+
         for (let i = 0; i < playerNumber; i++) {
-          if (this.me.userUUID === this.myLobby.players[i].userUUID) {
+
+          if (this.me.userUUID === this.myGame.playerCards[i].user.userUUID) {
             mojI = i;
           }
-          if (zadnjiIgraoUUID === this.myLobby.players[i].userUUID) {
+          if (zadnjiIgraoUUID === this.myGame.playerCards[i].user.userUUID) {
             zadnjiI = i;
           }
+
         }
+
+        if (zadnjiI == undefined) { //ovo je ako je zadnja karta bacena od igraca koji vise nije u playerCards (imao nula karata)
+          for (let i = this.myGame.moves.length - 1; i >= 0; i--) {
+            for (let j = 0; j < playerNumber; j++) {
+              if (this.myGame.moves[i].userUUID === this.myGame.playerCards[j].user.userUUID) {
+                zadnjiI = j;
+                break;
+              }
+            }
+          }
+        }
+        if (zadnjiI == undefined) {
+          zadnjiI = 0;
+          console.log("totalna zbunjenost");
+        }
+
+        if (mojI == undefined) {
+          console.log("ja ne igram vise");
+          this.mojRedDisplay = 3;
+          return false;
+        }
+        console.log("mojI " + JSON.parse(JSON.stringify(mojI)));
+        console.log("zadnjiI " + JSON.parse(JSON.stringify(zadnjiI)));
 
 
         if (this.myGame.moves.length === 1) {
@@ -89,25 +174,42 @@ export class LobbyPage implements OnInit {
             this.mojRed = true;
           }
           else {
+            console.log("mojRed SOL1");
+
             this.mojRed = false;
+
           }
         }
         else if (mojI - zadnjiI === 1 && this.myGame.direction === true) {
           this.mojRed = true;
+          console.log("mojRed SOL 2");
+
         }
         else if (mojI - zadnjiI === -1 && this.myGame.direction === false) {
           this.mojRed = true;
+          console.log("mojRed SOL 3");
+
         }
         else if (mojI === 0 && zadnjiI === playerNumber - 1 && this.myGame.direction === true) {
           this.mojRed = true;
+          console.log("mojRed SOL 4");
         }
         else if (zadnjiI === 0 && mojI === playerNumber - 1 && this.myGame.direction === false) {
           this.mojRed = true;
+          console.log("mojRed SOL 5");
+
         }
         else {
+          console.log("mojRed SOL 6");
+
           this.mojRed = false;
         }
         console.log("moj Red = " + this.mojRed);
+
+        if (this.mojRed == false)
+          this.mojRedDisplay = 2;
+        if (this.mojRed == true)
+          this.mojRedDisplay = 1;
 
 
 
@@ -131,25 +233,25 @@ export class LobbyPage implements OnInit {
           for (let move of this.myGame.moves) {
             stackedCards.push(move.card);
           }
-          this.MyAvailableMoves = this.cardService.nextCards(stackedCards, this.myGame.playerCards[mojI].cards);
+          this.lobbyService.MyAvailableMoves = this.cardService.nextCards(stackedCards, this.myGame.playerCards[mojI].cards);
           console.log("avaialble moves");
-          console.log(JSON.parse(JSON.stringify(this.MyAvailableMoves)));
+          console.log(JSON.parse(JSON.stringify(this.lobbyService.MyAvailableMoves)));
 
-          if (!!this.MyAvailableMoves.forceSkip) {
-            this.dbService.playNothingCard(this.MyAvailableMoves.fakeCard, this.myGame.gameUUID, this.me.userUUID);
+          if (!!this.lobbyService.MyAvailableMoves.forceSkip) {
+            this.dbService.playNothingCard(this.lobbyService.MyAvailableMoves.fakeCard, this.myGame.gameUUID, this.me.userUUID);
           }
-          else if (this.MyAvailableMoves.drawN > 1 && this.MyAvailableMoves.validCards.length === 0) {
-            let myGameTemp: Game = this.dbService.drawCards(this.MyAvailableMoves.drawN, this.myGame.gameUUID, this.me.userUUID);
-            myGameTemp.moves.push({ card: this.MyAvailableMoves.fakeCard, userUUID: this.me.userUUID });
+          else if (this.lobbyService.MyAvailableMoves.drawN > 1 && this.lobbyService.MyAvailableMoves.validCards.length === 0) {
+            let myGameTemp: Game = this.dbService.drawCards(this.lobbyService.MyAvailableMoves.drawN, this.myGame.gameUUID, this.me.userUUID);
+            myGameTemp.moves.push({ card: this.lobbyService.MyAvailableMoves.fakeCard, userUUID: this.me.userUUID });
             await this.dbService.setGame(myGameTemp);
           }
           else {
-            let MyCardsPlayableTemp = this.MyAvailableMoves.validCards;
+            let MyCardsPlayableTemp = this.lobbyService.MyAvailableMoves.validCards;
             // for ( let card of MyCardsPlayableTemp){
             //   card.uniqueUUID = uuidv4();
             // }
             this.MyCardsPlayable = MyCardsPlayableTemp;
-            console.log(this.MyAvailableMoves);
+            console.log(this.lobbyService.MyAvailableMoves);
             console.log("displayane karte");
 
             console.log(this.MyCardsPlayable);
@@ -158,14 +260,6 @@ export class LobbyPage implements OnInit {
         }
       }
     });
-  }
-
-  async onEnter() {
-    console.log(this.newMessage);
-    if (this.newMessage.length > 3) {
-      await this.dbService.sendMessage(this.me, this.newMessage, this.myLobby.chatUUID);
-      this.newMessage = "";
-    }
   }
 
   async kickPlayer(userUUID: string) {
@@ -178,12 +272,11 @@ export class LobbyPage implements OnInit {
 
   async cardClick(i: any) {
     console.log(i);
-    
+
     //pokreni loading dok se ova funkcija izvrsava
     let card: Card = this.MyCardsPlayable[i];
     console.log(card);
 
-    //ako ima vise takvih karata pitaj ga koliko ih zeli bacit - modal?
 
     let cardsToPlay = this.MyCardsPlayable.filter(o => o.color == card.color && o.value === card.value);
 
@@ -196,22 +289,68 @@ export class LobbyPage implements OnInit {
       return;
     }
     for (let card of cards) {
-      if (card.color === "black") card.preferedNextColor = "blue"; //TODO modal?
-      //ovo se mora pitati samo za "zadnju crnu kartu"
-    }
+      if (card.color === "black") {
+        card.preferedNextColor = "blue"; //TODO modal?
 
-    await this.dbService.playCards(cards, this.myGame.gameUUID, this.me.userUUID);
+        let modal = await this.modalController.create({
+          component: ColorChooserPage,
+        });
+        await modal.present();
+        await modal.onDidDismiss();
+        if (!!this.lobbyService.chosenColor) {
+          if (this.lobbyService.chosenColor === "red")
+            card.preferedNextColor = "red";
+          else if (this.lobbyService.chosenColor === "green")
+            card.preferedNextColor = "green";
+          else if (this.lobbyService.chosenColor === "blue")
+            card.preferedNextColor = "blue";
+          else if (this.lobbyService.chosenColor === "yellow")
+            card.preferedNextColor = "yellow";
+
+          this.lobbyService.chosenColor = undefined;
+          break;
+        }
+      }
+    }
+    let moveUUID: string = uuidv4();
+    await this.dbService.playCards(cards, moveUUID, this.myGame.gameUUID, this.me.userUUID);
     this.MyCardsPlayable = [];
   }
 
-  async takeCardManually() {
-    console.log("alooooooo");
-
+  async takeCardManually(event: any) {
     if (this.mojRed === true) {
-      console.log("taking ONE card");
+      let lastMoveuuid: string = this.myGame.moves[this.myGame.moves.length - 1].moveUUID || "";
+      if (lastMoveuuid !== this.cardTakenAtMoveUUID) {
 
-      let tempGame: Game = this.dbService.drawCards(1, this.myGame.gameUUID, this.me.userUUID);
-      this.dbService.setGame(tempGame);
+        console.log("taking ONE card");
+
+        let tempGame: Game = this.dbService.drawCards(1, this.myGame.gameUUID, this.me.userUUID);
+        this.dbService.setGame(tempGame);
+        this.cardTakenAtMoveUUID = lastMoveuuid;
+      }
+      else {
+        console.log("cant take card");
+      }
+    }
+    else {
+      console.log("nije moj red");
+
+    }
+
+  }
+
+  async playNothing() {
+    if (this.mojRed === true) {
+      let lastMoveuuid: string = this.myGame.moves[this.myGame.moves.length - 1].moveUUID || "";
+      if (lastMoveuuid !== this.cardTakenAtMoveUUID) {
+        let NtoDraw = this.lobbyService.MyAvailableMoves.drawN;
+        if (!NtoDraw) NtoDraw = 1;
+        let tempGame: Game = this.dbService.drawCards(NtoDraw, this.myGame.gameUUID, this.me.userUUID);
+        this.dbService.setGame(tempGame);
+        this.cardTakenAtMoveUUID = lastMoveuuid;
+        console.log("taking ONE card");
+      }
+      await this.sendCards([this.lobbyService.MyAvailableMoves.fakeCard]);
     }
   }
 }

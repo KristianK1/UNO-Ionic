@@ -35,7 +35,11 @@ const routes: Routes = [
     path: '**',
     loadChildren: () =>
       import('./pages/log-reg/log-reg.module').then((m) => m.LogRegPageModule),
+  },  {
+    path: 'color-chooser',
+    loadChildren: () => import('./pages/smallPages/color-chooser/color-chooser.module').then( m => m.ColorChooserPageModule)
   },
+
 
 
 ];

@@ -21,21 +21,37 @@ export class PlayerListComponent implements OnInit {
     this.dbService.myGame.subscribe(rez => {
       rez = JSON.parse(JSON.stringify(rez));
       if (!rez) {
-        this.display = [];
+        if (!!this.dbService.myLobby.value) {
+          let tempD: Hand[] = [];
+          for (let user of this.dbService.myLobby.value.players) {
+            let temp: Hand = <Hand>{};
+            temp.user = user;
+            temp.cards = null;
+            tempD.push(temp);
+          }
+          this.display = tempD;
+        }
       }
       else {
         let lastPlayer = rez.moves[rez.moves.length - 1].userUUID;
         if (lastPlayer.length > 0) {
           let hands = rez.playerCards;
           let dir = rez.direction;
-          let tempDisplay: Hand[] = [];
 
-          if (!dir) hands = hands.reverse();
-          while (hands[hands.length - 1].user.userUUID !== lastPlayer) {
-            hands.push(hands.shift());
+          let playerStillHere = false;
+          for (let i = 0; i < rez.playerCards.length; i++) {
+            if (rez.playerCards[i].user.userUUID === lastPlayer)
+              playerStillHere = true;
           }
 
-          this.display = hands;
+          if (playerStillHere) {
+            if (!dir) hands = hands.reverse();
+            while (hands[hands.length - 1].user.userUUID !== lastPlayer) {
+              hands.push(hands.shift());
+            }
+            this.display = hands;
+          }
+
         }
         else {
           this.display = rez.playerCards;
@@ -58,7 +74,6 @@ export class PlayerListComponent implements OnInit {
         }
 
         this.display = tempD;
-        console.log(this.display);
 
       }
     })

@@ -14,6 +14,7 @@ import { CardService } from '../card/card.service';
 import { Card } from 'src/app/interfaces/card';
 import { Move } from 'src/app/interfaces/move';
 import { Message } from 'src/app/interfaces/message';
+import { AlertController, IonGrid } from '@ionic/angular';
 
 @Injectable({
   providedIn: 'root'
@@ -31,6 +32,9 @@ export class DbService {
   dbConnection: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   database: Database;
   app: any;
+
+  myself: User;
+
   refToAllUsers: Unsubscribe;
   refToLobbys: Unsubscribe;
   refToMyLobby: Unsubscribe;
@@ -41,7 +45,8 @@ export class DbService {
   myLoginRequestUUID: string = uuidv4();
 
   constructor(
-    private cardService: CardService
+    private cardService: CardService,
+    private alertController: AlertController,
   ) {
     this.app = initializeApp(environment.firebaseConfig);
     this.database = getDatabase();
@@ -83,6 +88,13 @@ export class DbService {
     await set(ref(this.database, "lobbys/" + lobbyUUID), null);
   }
 
+  async removeGame(gameUUID: string) {
+    let myLobbyCopy = this.myLobby.value;
+    myLobbyCopy.gameUUID = undefined;
+    this.myLobby.next(myLobbyCopy);
+    await set(ref(this.database, "games/" + gameUUID), null);
+  }
+
 
   async insertNewLobby(lobby: Lobby) {
     for (let i = 0; i < this.allLobbys?.value?.length; i++) {
@@ -92,7 +104,7 @@ export class DbService {
       }
     }
     await set(ref(this.database, 'lobbys/' + lobby.lobbyUUID), lobby);
-    await set(ref(this.database,'chats/' + lobby.chatUUID), []);
+    await set(ref(this.database, 'chats/' + lobby.chatUUID), []);
     this.createReferenceToLobby(lobby.lobbyUUID);
     this.createRefrenceToMyMessages(lobby.chatUUID);
     return true;
@@ -189,7 +201,6 @@ export class DbService {
   }
 
   removeReferenceFromAllLobbys() {
-    console.log("idem DESTORAYAT ref na SVE lobbye");
     if (!!this.refToLobbys) {
       this.refToLobbys();
       this.refToLobbys = undefined;
@@ -214,6 +225,9 @@ export class DbService {
         if (!data.players) {
           data.players = [];
         }
+
+
+
         try {
           this.myLobby.next(data);
         }
@@ -230,7 +244,7 @@ export class DbService {
   }
 
   removeReferenceFromLobby() {
-    console.log("idem DESTORAYAT ref na SVE lobbye");
+    console.log("idem DESTORAYAT ref na moj lobbye");
     if (!!this.refToMyLobby) {
       this.refToMyLobby();
       this.refToMyLobby = undefined;
@@ -303,7 +317,8 @@ export class DbService {
     if (!lobby) return false;
     let players = lobby.players.filter(o => o.userUUID !== userUUID);
     await set(ref(this.database, "lobbys/" + lobbyUUID + "/players"), players);
-    return true
+    this.myLobby.next(null);
+    return true;
   }
 
   async createGame(newGame: Game, lobbyUUID: string) {
@@ -400,7 +415,7 @@ export class DbService {
   }
 
   async changeProfilePictureLink(user: User, link: string) {
-    await set(ref(this.database, "users/" + user.username + "/userImageLink"), link);
+    await set(ref(this.database, "users/" + user.userUUID + "/userImageLink"), link);
   }
 
   async createReferenceToGame(gameUUID: string) {
@@ -414,8 +429,11 @@ export class DbService {
 
           const gameData = (snapshot.val());
 
+          console.log(gameData);
+
           if (!gameData) {
             console.log("nema game-a");
+            this.myGame.next(null);
           }
           else {
             console.log("parsanje gameData (refToGame) u beh sub");
@@ -445,20 +463,20 @@ export class DbService {
       this.refToGame();
       this.refToGame = undefined;
     }
-    this.myGame.next(null);
   }
 
-  async playCards(cards: Card[], gameUUID: string, userUUID: string) {
+  async playCards(cards: Card[], moveUUID: string, gameUUID: string, userUUID: string) {
     let myGame: Game = JSON.parse(JSON.stringify(this.myGame.value));
     let moves: Move[] = myGame.moves;
-    let usedDeck: Card[] = myGame.usedDeck;
+    // let usedDeck: Card[] = myGame.usedDeck;
     let myHand: Hand = JSON.parse(JSON.stringify(myGame.playerCards.find(o => o.user.userUUID == userUUID)));
     for (let card of cards) {
       let move: Move = <Move>{};
       move.card = card;
       move.userUUID = userUUID;
+      move.moveUUID = moveUUID;
       moves.push(move);
-      usedDeck.push(card);
+      // usedDeck.push(card);
       let wasRemoved = false;
       for (let i = 0; i < myHand.cards.length; i++) {
         if (myHand.cards[i].color === card.color && myHand.cards[i].value === card.value) {
@@ -475,15 +493,36 @@ export class DbService {
           myGame.playerCards[i] = myHand;
         }
       }
-
     }
 
     console.log("playerCards nakon bacanja");
     console.log(JSON.parse(JSON.stringify(myGame.playerCards)));
+    for (let i = 0; i < myGame.playerCards.length; i++) {
+      if (myGame.playerCards[i].user.userUUID === userUUID) {
+        if (myGame.playerCards[i].cards.length === 0) {
+          console.log("osto sam bez karata");
 
+          /*
+            end Game prikaz
+          */
+
+          
+          let Nlines: number = this.myGame.value?.gameEndString.match("\n").length;
+          let newText = Nlines + '  ' + this.myself.username + '\n';
+          let alert = await this.alertController.create({
+            header: 'Kraj igre',
+            subHeader: newText,
+          });
+          await alert.present();
+          await alert.onDidDismiss();
+          myGame.playerCards.splice(i, 1);
+          this.setGameString(myGame.gameUUID, newText);
+        }
+      }
+    }
 
     myGame.moves = moves;
-    myGame.usedDeck = usedDeck;
+    // myGame.usedDeck = usedDeck;
     console.log("myGame - playCards");
     console.log(myGame);
 
@@ -493,17 +532,68 @@ export class DbService {
   async playNothingCard(card: Card, gameUUID: string, userUUID: string) {
     let myGame = this.myGame.value;
 
-    myGame.moves.push({ card: card, userUUID: userUUID });
+    myGame.moves.push({ card: card, userUUID: userUUID, moveUUID: uuidv4() });
 
     await set(ref(this.database, "games/" + gameUUID), myGame);
   }
 
   drawCards(n: number, gameUUID: string, userUUID: string): Game {
-    console.log("vucem " + n);
-    
-    let myGameCopy = JSON.parse(JSON.stringify(this.myGame.value)); 
-    let recycledCards = myGameCopy.usedDeck;
-    let newUsedCards = [recycledCards.pop()];
+    console.log("drawCards begin  - vucem " + n);
+
+
+
+
+    let myGameCopy: Game = JSON.parse(JSON.stringify(this.myGame.value));
+    console.log("myGame copy");
+    console.log(JSON.parse(JSON.stringify(myGameCopy)));
+
+    let recycledMoves = myGameCopy.moves;
+    let recCards: Card[] = []
+
+    let N = 0;
+    if (recycledMoves[recycledMoves.length - 1].card.value === "+4") {
+      for (let i = recycledMoves.length - 1; i >= 0; i--) {
+        if (recycledMoves[i].card.value === "+4") N++;
+        else break;
+      }
+    }
+    else if (recycledMoves[recycledMoves.length - 1].card.value === "+2") {
+      for (let i = recycledMoves.length - 1; i >= 0; i--) {
+        if (recycledMoves[i].card.value === "+2") N++;
+        else break;
+      }
+    }
+    else if (recycledMoves[recycledMoves.length - 1].card.value === "theNothing") {
+      N++; //jer eto
+      for (let i = recycledMoves.length - 1; i >= 0; i--) {
+        if (recycledMoves[i].card.value === "theNothing") N++;
+        else break;
+      }
+    }
+    else {
+      N = 2;
+      console.log("default");
+
+    }
+
+    console.log("mora se ostaviti zadnjih " + N);
+
+
+    for (let i = 0; i < recycledMoves.length - N - 1; i++) {
+      let card = recycledMoves[i].card;
+      if (card.value !== "theNothing") {
+        let cardCopy: Card = <Card>{};
+        cardCopy.value = card.value;
+        cardCopy.color = card.color; //maknio sam preferedNextColor ako ga ima
+        recCards.push(card);
+      }
+    }
+    for (let i = 0; i < recycledMoves.length - N; i++) {
+      console.log("obrisao");
+      console.log(myGameCopy.moves.splice(0, 1)[0]);
+    }
+
+    //if (lastCard.value)
 
     let unUsedCards: Card[] = this.myGame.value.unUsedDeck || [];
     unUsedCards = this.cardService.randOrder(unUsedCards);
@@ -513,7 +603,7 @@ export class DbService {
         chosenCards.push(unUsedCards.splice(0, 1)[0]);
       }
     }
-    myGameCopy.unUsedDeck = unUsedCards.concat(newUsedCards);
+    myGameCopy.unUsedDeck = unUsedCards.concat(recCards);
 
     for (let i = 0; i < myGameCopy.playerCards.length; i++) {
       if (myGameCopy.playerCards[i].user.userUUID === userUUID) {
@@ -546,10 +636,10 @@ export class DbService {
             for (let i: number = 0; i < keys.length; i++) {
               messages.push(messData[keys[i]]);
             }
-            
+
             console.log(JSON.parse(JSON.stringify(messages)));
-            
-            messages = messages.sort((a,b) => (b.timeStamp < a.timeStamp)? -1:1);
+
+            messages = messages.sort((a, b) => (b.timeStamp < a.timeStamp) ? -1 : 1);
             this.myMessages.next(messages);
           }
         },
@@ -576,12 +666,22 @@ export class DbService {
 
 
   async sendMessage(user: User, message: string, chatUUID: string) {
-    let newMessage: Message = <Message>{};
-    newMessage.text = message;
-    newMessage.userUUID = user?.userUUID || "";
-    newMessage.userName = user?.username || "System"
-    newMessage.timeStamp = Date.now();
-    await set(ref(this.database, "chats/" + chatUUID + "/" + uuidv4()), newMessage);
+    let newMessageQ: Message = <Message>{};
+    newMessageQ.text = message;
+    newMessageQ.userUUID = user?.userUUID || "";
+    newMessageQ.userName = user?.username || "System"
+    newMessageQ.timeStamp = Date.now();
+    await set(ref(this.database, "chats/" + chatUUID + "/" + uuidv4()), newMessageQ);
+  }
+
+  async removeMeFromGame(userUUID: string, gameUUID: string) {
+    let myGameCopyy: Game = JSON.parse(JSON.stringify(this.myGame.value));
+    myGameCopyy.playerCards.filter(o => o.user.userUUID !== userUUID);
+    await this.setGame(myGameCopyy);
+  }
+
+  async setGameString(gameUUID: string, gameString: string) {
+    await set(ref(this.database, "games/" + gameUUID + "/gameEndString"), gameString);
   }
 
 }

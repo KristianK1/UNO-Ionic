@@ -5,7 +5,6 @@ import { User } from "./user";
 export interface Lobby {
     lobbyUUID: string,
     lobbyName: string,
-    lobbyPassword: string,
     players: User[],
     gameUUID: string,
     previusGameStat: GameStat[],

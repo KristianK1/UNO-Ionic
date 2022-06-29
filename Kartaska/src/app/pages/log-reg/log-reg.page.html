@@ -24,6 +24,12 @@
       <ion-input type="password" [(ngModel)]="password_login"></ion-input>
     </ion-item>
 
+    <ion-item *ngIf="error_message_show">
+      <ion-label style="width: 100%; text-align: center; color: #FF0000;">
+        Niste uspješno ulogirani
+      </ion-label>
+    </ion-item>
+
     <ion-button *ngIf="mode==false" class="imgInsertBt" (click)="insertImage()">Insert profile image</ion-button>
     <ion-img *ngIf="mode==false && tempImg?.length> 5000" [src]="tempImgPrefix"></ion-img>
 

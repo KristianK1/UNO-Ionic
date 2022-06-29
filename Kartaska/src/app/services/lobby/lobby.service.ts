@@ -125,6 +125,7 @@ export class LobbyService {
     newGame.moves = [];
     newGame.direction = true;
     newGame.unUsedDeck = [];
+    newGame.gameEndString = "";
 
     for (let i = 0; i < 108; i++) {
       newGame.unUsedDeck.push(this.cardService.numToCard(i));

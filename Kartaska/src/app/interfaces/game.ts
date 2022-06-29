@@ -10,5 +10,6 @@ export interface Game {
     unUsedDeck: Card[],
     // usedDeck: Card[],
     playerCards: Hand[],
-    direction: boolean;
+    direction: boolean,
+    gameEndString: string,
 }

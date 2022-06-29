@@ -14,7 +14,7 @@ import { CardService } from '../card/card.service';
 import { Card } from 'src/app/interfaces/card';
 import { Move } from 'src/app/interfaces/move';
 import { Message } from 'src/app/interfaces/message';
-import { IonGrid } from '@ionic/angular';
+import { AlertController, IonGrid } from '@ionic/angular';
 
 @Injectable({
   providedIn: 'root'
@@ -32,6 +32,9 @@ export class DbService {
   dbConnection: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   database: Database;
   app: any;
+
+  myself: User;
+
   refToAllUsers: Unsubscribe;
   refToLobbys: Unsubscribe;
   refToMyLobby: Unsubscribe;
@@ -42,7 +45,8 @@ export class DbService {
   myLoginRequestUUID: string = uuidv4();
 
   constructor(
-    private cardService: CardService
+    private cardService: CardService,
+    private alertController: AlertController,
   ) {
     this.app = initializeApp(environment.firebaseConfig);
     this.database = getDatabase();
@@ -221,7 +225,7 @@ export class DbService {
         if (!data.players) {
           data.players = [];
         }
-        
+
 
 
         try {
@@ -497,7 +501,22 @@ export class DbService {
       if (myGame.playerCards[i].user.userUUID === userUUID) {
         if (myGame.playerCards[i].cards.length === 0) {
           console.log("osto sam bez karata");
+
+          /*
+            end Game prikaz
+          */
+
+          
+          let Nlines: number = this.myGame.value?.gameEndString.match("\n").length;
+          let newText = Nlines + '  ' + this.myself.username + '\n';
+          let alert = await this.alertController.create({
+            header: 'Kraj igre',
+            subHeader: newText,
+          });
+          await alert.present();
+          await alert.onDidDismiss();
           myGame.playerCards.splice(i, 1);
+          this.setGameString(myGame.gameUUID, newText);
         }
       }
     }
@@ -659,6 +678,10 @@ export class DbService {
     let myGameCopyy: Game = JSON.parse(JSON.stringify(this.myGame.value));
     myGameCopyy.playerCards.filter(o => o.user.userUUID !== userUUID);
     await this.setGame(myGameCopyy);
+  }
+
+  async setGameString(gameUUID: string, gameString: string) {
+    await set(ref(this.database, "games/" + gameUUID + "/gameEndString"), gameString);
   }
 
 }

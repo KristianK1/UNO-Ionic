@@ -1,8 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Card } from 'src/app/interfaces/card';
-import { CardService } from 'src/app/services/card/card.service';
-import { DbService } from 'src/app/services/db/db.service';
-import { UserService } from 'src/app/services/user/user.service';
 
 @Component({
   selector: 'app-playable-cards',

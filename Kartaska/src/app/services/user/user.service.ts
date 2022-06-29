@@ -39,6 +39,7 @@ export class UserService {
         );
         console.log("ja u user servicu");
         console.log(this.user.value);
+        this.dbService.myself = this.user.value;
         console.log("ovo sam ja");
         if (!myself) {
           this.logout();

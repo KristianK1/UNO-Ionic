@@ -102,7 +102,7 @@ export class LobbyPage implements OnInit {
     this.dbService.myGame.subscribe(async rez => {
       if (!rez) {
         console.log("brisem sveeeeeeeeee");
-
+        this.mojRedDisplay = undefined;
         this.myGame = null;
         this.myCards = [];
         this.lobbyService.MyAvailableMoves = undefined;
@@ -157,11 +157,10 @@ export class LobbyPage implements OnInit {
         if (zadnjiI == undefined) {
           zadnjiI = 0;
           console.log("totalna zbunjenost");
-
         }
 
         if (mojI == undefined) {
-          console.log("ja ne igram visegsfgs");
+          console.log("ja ne igram vise");
           this.mojRedDisplay = 3;
           return false;
         }
@@ -293,25 +292,23 @@ export class LobbyPage implements OnInit {
       if (card.color === "black") {
         card.preferedNextColor = "blue"; //TODO modal?
 
-        for (; ;) {
-          let modal = await this.modalController.create({
-            component: ColorChooserPage,
-          });
-          await modal.present();
-          await modal.onDidDismiss();
-          if (!!this.lobbyService.chosenColor) {
-            if (this.lobbyService.chosenColor === "red")
-              card.preferedNextColor = "red";
-            else if (this.lobbyService.chosenColor === "green")
-              card.preferedNextColor = "green";
-            else if (this.lobbyService.chosenColor === "blue")
-              card.preferedNextColor = "blue";
-            else if (this.lobbyService.chosenColor === "yellow")
-              card.preferedNextColor = "yellow";
+        let modal = await this.modalController.create({
+          component: ColorChooserPage,
+        });
+        await modal.present();
+        await modal.onDidDismiss();
+        if (!!this.lobbyService.chosenColor) {
+          if (this.lobbyService.chosenColor === "red")
+            card.preferedNextColor = "red";
+          else if (this.lobbyService.chosenColor === "green")
+            card.preferedNextColor = "green";
+          else if (this.lobbyService.chosenColor === "blue")
+            card.preferedNextColor = "blue";
+          else if (this.lobbyService.chosenColor === "yellow")
+            card.preferedNextColor = "yellow";
 
-            this.lobbyService.chosenColor = undefined;
-            break;
-          }
+          this.lobbyService.chosenColor = undefined;
+          break;
         }
       }
     }

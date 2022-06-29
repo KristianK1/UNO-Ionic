@@ -16,6 +16,8 @@ import { Router } from '@angular/router';
 })
 export class LogRegPage implements OnInit, OnDestroy {
 
+  error_message_show = false;
+
   mode: boolean = true;
   username_login: string = '';
   password_login: string = '';
@@ -99,7 +101,11 @@ export class LogRegPage implements OnInit, OnDestroy {
     let loggedIn = await this.userService.login(username || this.username_login, password || this.password_login);
     console.log("loggedIn = " + loggedIn);
     if (loggedIn) {
+      this.error_message_show = false;
       this.router.navigate(["mainApp/home"]);
+    }
+    else{
+      this.error_message_show = true;
     }
 
     try {

@@ -162,6 +162,7 @@ export class LobbyPage implements OnInit {
         if (mojI == undefined) {
           console.log("ja ne igram vise");
           this.mojRedDisplay = 3;
+          this.mainCard = null;
           return false;
         }
         console.log("mojI " + JSON.parse(JSON.stringify(mojI)));

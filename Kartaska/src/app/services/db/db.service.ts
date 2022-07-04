@@ -507,16 +507,16 @@ export class DbService {
           */
 
           
-          let Nlines: number = this.myGame.value?.gameEndString.match("\n").length;
-          let newText = Nlines + '  ' + this.myself.username + '\n';
-          let alert = await this.alertController.create({
-            header: 'Kraj igre',
-            subHeader: newText,
-          });
-          await alert.present();
-          await alert.onDidDismiss();
-          myGame.playerCards.splice(i, 1);
-          this.setGameString(myGame.gameUUID, newText);
+          // let Nlines: number = this.myGame.value?.gameEndString.match("\n").length;
+          // let newText = Nlines + '  ' + this.myself.username + '\n';
+          // let alert = await this.alertController.create({
+          //   header: 'Kraj igre',
+          //   subHeader: newText,
+          // });
+          // await alert.present();
+          // await alert.onDidDismiss();
+          // myGame.playerCards.splice(i, 1);
+          // this.setGameString(myGame.gameUUID, newText);
         }
       }
     }
